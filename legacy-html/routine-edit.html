@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLog - 루틴 설정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+            padding-bottom: 100px;
+        }
+        .exercise-item {
+            transition: all 0.2s ease;
+        }
+        .exercise-item:active {
+            background-color: #f1f5f9;
+        }
+        .drag-handle {
+            cursor: grab;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            max-width: 448px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header class="p-5 bg-white sticky top-0 z-30 shadow-sm flex items-center gap-4">
+        <button class="w-8 h-8 flex items-center justify-center text-slate-800 active:scale-90 transition-transform">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h1 class="text-lg font-bold text-slate-800">루틴 설정</h1>
+    </header>
+
+    <main class="max-w-md mx-auto p-5 space-y-8">
+        
+        <!-- 루틴 기본 정보 -->
+        <section class="space-y-4">
+            <div>
+                <label class="text-[11px] font-black text-slate-400 uppercase ml-1 mb-2 block">루틴 이름</label>
+                <input type="text" value="상체 벌크업 A" placeholder="루틴 이름을 입력하세요" class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 text-base font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm">
+            </div>
+
+            <div>
+                <label class="text-[11px] font-black text-slate-400 uppercase ml-1 mb-2 block">목표 반복 주기</label>
+                <div class="grid grid-cols-7 gap-2">
+                    <button class="aspect-square rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 active:bg-indigo-50 transition-colors">월</button>
+                    <button class="aspect-square rounded-xl border border-indigo-600 bg-indigo-600 text-xs font-bold text-white shadow-md shadow-indigo-100">화</button>
+                    <button class="aspect-square rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600">수</button>
+                    <button class="aspect-square rounded-xl border border-indigo-600 bg-indigo-600 text-xs font-bold text-white shadow-md shadow-indigo-100">목</button>
+                    <button class="aspect-square rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600">금</button>
+                    <button class="aspect-square rounded-xl border border-indigo-600 bg-indigo-600 text-xs font-bold text-white shadow-md shadow-indigo-100">토</button>
+                    <button class="aspect-square rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-400">일</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 운동 목록 -->
+        <section class="space-y-4">
+            <div class="flex justify-between items-center px-1">
+                <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-wider">운동 목록 (3)</h2>
+                <button class="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                    <i class="fa-solid fa-plus-circle"></i> 운동 추가
+                </button>
+            </div>
+
+            <!-- 운동 아이템 1 -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 space-y-4 exercise-item">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="drag-handle text-slate-300">
+                            <i class="fa-solid fa-grip-vertical"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">벤치 프레스</h3>
+                            <p class="text-[10px] text-indigo-500 font-bold uppercase">가슴</p>
+                        </div>
+                    </div>
+                    <button class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                </div>
+                
+                <!-- 세트 설정 -->
+                <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
+                    <div class="grid grid-cols-3 gap-4 text-[10px] font-black text-slate-400 uppercase px-2">
+                        <span>세트</span>
+                        <span>무게(kg)</span>
+                        <span>횟수</span>
+                    </div>
+                    <!-- 세트 행 1 -->
+                    <div class="grid grid-cols-3 gap-4 items-center">
+                        <span class="text-xs font-bold text-slate-600 px-2">1세트</span>
+                        <input type="number" value="60" class="bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-center text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <input type="number" value="12" class="bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-center text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <!-- 세트 행 2 -->
+                    <div class="grid grid-cols-3 gap-4 items-center">
+                        <span class="text-xs font-bold text-slate-600 px-2">2세트</span>
+                        <input type="number" value="60" class="bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-center text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <input type="number" value="10" class="bg-white border border-slate-200 rounded-lg py-1.5 px-2 text-center text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <button class="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-white transition-colors">
+                        + 세트 추가
+                    </button>
+                </div>
+            </div>
+
+            <!-- 운동 아이템 2 -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 space-y-4 exercise-item">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="drag-handle text-slate-300">
+                            <i class="fa-solid fa-grip-vertical"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">숄더 프레스</h3>
+                            <p class="text-[10px] text-indigo-500 font-bold uppercase">어깨</p>
+                        </div>
+                    </div>
+                    <button class="text-slate-300"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                </div>
+                <button class="w-full py-3 bg-slate-50 rounded-2xl text-xs font-bold text-slate-500">
+                    세트 정보 펼치기 (3세트)
+                </button>
+            </div>
+        </section>
+
+        <!-- AI 가이드 알림 -->
+        <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3">
+            <i class="fa-solid fa-lightbulb text-amber-500 mt-1"></i>
+            <p class="text-[11px] text-amber-700 leading-relaxed font-medium">
+                <span class="font-bold">운동 순서 팁:</span> 대근육(가슴) 운동을 소근육(삼두) 운동보다 먼저 배치하는 것이 근성장에 더 효율적입니다.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- 하단 고정 저장 버튼 -->
+    <div class="fixed-bottom p-5 bg-gradient-to-t from-white via-white to-transparent">
+        <button class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-base shadow-lg shadow-indigo-100 active:scale-[0.98] transition-all">
+            저장하기
+        </button>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLog - 설정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+        }
+        .setting-item {
+            transition: background-color 0.2s;
+        }
+        .setting-item:active {
+            background-color: #f1f5f9;
+        }
+        /* 토글 스위치 커스텀 */
+        .toggle-dot {
+            transition: transform 0.2s ease-in-out;
+        }
+        input:checked ~ .toggle-bg {
+            background-color: #4f46e5;
+        }
+        input:checked ~ .toggle-dot {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-slate-50">
+        <!-- 헤더 -->
+        <header class="px-5 py-4 flex items-center bg-white sticky top-0 z-30 shadow-sm">
+            <button class="w-10 h-10 flex items-center justify-start text-slate-800 active:scale-95 transition-transform">
+                <i class="fa-solid fa-chevron-left text-lg"></i>
+            </button>
+            <h1 class="text-base font-bold text-slate-800 flex-1 text-center mr-10">설정</h1>
+        </header>
+
+        <main class="flex-1 pb-10 pt-6">
+            <!-- 설정 그룹: 계정 정보 (비밀번호 변경 제거됨) -->
+            <div class="px-5 mb-2">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1 mb-2">계정 정보</h3>
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+                    <div class="setting-item px-5 py-4 flex items-center justify-between border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-slate-400 w-5 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">로그아웃</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                    </div>
+                    <div class="setting-item px-5 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3 text-rose-500">
+                            <i class="fa-solid fa-user-slash w-5 text-center"></i>
+                            <span class="text-sm font-medium">프로필 탈퇴</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 그룹: 알림 -->
+            <div class="px-5 mt-6 mb-2">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1 mb-2">서비스 알림</h3>
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+                    <div class="px-5 py-4 flex items-center justify-between border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-bell text-slate-400 w-5 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">푸시 알림 전체 허용</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only">
+                            <div class="toggle-bg w-10 h-6 bg-slate-200 rounded-full transition-colors"></div>
+                            <div class="toggle-dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-transform"></div>
+                        </label>
+                    </div>
+                    <div class="px-5 py-4 flex items-center justify-between border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-utensils text-slate-400 w-5 text-center"></i>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-medium text-slate-700">식단 기록 리마인더</span>
+                                <span class="text-[10px] text-slate-400">잊지 않게 식사 시간에 알림을 보내드려요</span>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only">
+                            <div class="toggle-bg w-10 h-6 bg-slate-200 rounded-full transition-colors"></div>
+                            <div class="toggle-dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-transform"></div>
+                        </label>
+                    </div>
+                    <div class="px-5 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-dumbbell text-slate-400 w-5 text-center"></i>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-medium text-slate-700">운동 기록 리마인더</span>
+                                <span class="text-[10px] text-slate-400">오늘의 운동 목표를 알려드려요</span>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only">
+                            <div class="toggle-bg w-10 h-6 bg-slate-200 rounded-full transition-colors"></div>
+                            <div class="toggle-dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-transform"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 그룹: 기타 -->
+            <div class="px-5 mt-6 mb-2">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-wider ml-1 mb-2">지원 및 정보</h3>
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+                    <div class="setting-item px-5 py-4 flex items-center justify-between border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-question text-slate-400 w-5 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">자주 묻는 질문 (FAQ)</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                    </div>
+                    <div class="setting-item px-5 py-4 flex items-center justify-between border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-shield-halved text-slate-400 w-5 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">개인정보 처리방침</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                    </div>
+                    <div class="setting-item px-5 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-info text-slate-400 w-5 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">버전 정보</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">v1.2.0 최신</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 mt-10 text-center">
+                <p class="text-[10px] text-slate-300 font-medium tracking-tight">© 2024 FitLog. All rights reserved.</p>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

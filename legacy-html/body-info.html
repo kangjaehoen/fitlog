@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLog - 신체 데이터 기록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        .tab-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* 슬라이더 커스텀 */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #f1f5f9;
+            border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid currentColor;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .active-tab-weight { color: #4f46e5; border-color: #4f46e5; background-color: #f5f3ff; }
+        .active-tab-muscle { color: #10b981; border-color: #10b981; background-color: #ecfdf5; }
+        .active-tab-fat { color: #f43f5e; border-color: #f43f5e; background-color: #fff1f2; }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-md mx-auto min-h-screen flex flex-col">
+        <!-- 헤더 -->
+        <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
+            <button class="w-10 h-10 flex items-center justify-start text-slate-800">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h1 class="text-base font-bold text-slate-800">기록하기</h1>
+            <div class="w-10"></div>
+        </header>
+
+        <main class="flex-1 px-5 pt-4 space-y-10">
+            <!-- 날짜 선택 -->
+            <div class="flex items-center justify-center gap-2 text-slate-400">
+                <i class="fa-regular fa-calendar text-xs"></i>
+                <span class="text-xs font-bold text-slate-500">2024년 4월 5일 (오늘)</span>
+                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </div>
+
+            <!-- 항목 선택 탭 -->
+            <div class="flex gap-2 p-1 bg-slate-50 rounded-2xl">
+                <button id="tab-weight" onclick="switchTab('weight')" class="flex-1 py-3.5 rounded-xl text-xs font-black tab-transition active-tab-weight">
+                    몸무게
+                </button>
+                <button id="tab-muscle" onclick="switchTab('muscle')" class="flex-1 py-3.5 rounded-xl text-xs font-black text-slate-400 tab-transition">
+                    골격근량
+                </button>
+                <button id="tab-fat" onclick="switchTab('fat')" class="flex-1 py-3.5 rounded-xl text-xs font-black text-slate-400 tab-transition">
+                    체지방률
+                </button>
+            </div>
+
+            <!-- 입력 영역 컨테이너 -->
+            <div id="input-container" class="py-12 flex flex-col items-center justify-center space-y-16">
+                
+                <!-- 대형 수치 표시 -->
+                <div class="text-center">
+                    <div class="flex items-baseline justify-center gap-1">
+                        <input id="main-input" type="number" value="74.2" step="0.1" class="w-40 text-center text-7xl font-black focus:outline-none bg-transparent transition-colors duration-300" style="color: #4f46e5;">
+                        <span id="unit-label" class="text-2xl font-bold text-slate-300 transition-colors">kg</span>
+                    </div>
+                </div>
+
+                <!-- 조절 슬라이더 -->
+                <div class="w-full px-6">
+                    <input id="data-slider" type="range" min="40" max="150" step="0.1" value="74.2" class="transition-colors duration-300" style="color: #4f46e5;">
+                    <div class="flex justify-between mt-4 text-xs font-bold text-slate-300 px-1">
+                        <span id="min-val">40.0</span>
+                        <span id="max-val">150.0</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 하단 고정 버튼 -->
+        <footer class="p-6 bg-white">
+            <button id="submit-btn" class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-base font-bold shadow-xl shadow-indigo-100 active:scale-[0.98] transition-all">
+                저장하기
+            </button>
+        </footer>
+    </div>
+
+    <script>
+        const config = {
+            weight: { color: '#4f46e5', unit: 'kg', min: 40, max: 150, current: 74.2 },
+            muscle: { color: '#10b981', unit: 'kg', min: 10, max: 70, current: 36.5 },
+            fat: { color: '#f43f5e', unit: '%', min: 3, max: 50, current: 16.8 }
+        };
+
+        function switchTab(type) {
+            const tabs = ['weight', 'muscle', 'fat'];
+            const data = config[type];
+
+            // 탭 스타일 업데이트
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                el.className = `flex-1 py-3.5 rounded-xl text-xs font-black tab-transition ${t === type ? `active-tab-${type}` : 'text-slate-400'}`;
+            });
+
+            // UI 요소 업데이트
+            const input = document.getElementById('main-input');
+            const slider = document.getElementById('data-slider');
+            const unit = document.getElementById('unit-label');
+            const submitBtn = document.getElementById('submit-btn');
+            const minVal = document.getElementById('min-val');
+            const maxVal = document.getElementById('max-val');
+
+            input.style.color = data.color;
+            slider.style.color = data.color;
+            submitBtn.style.backgroundColor = data.color;
+            submitBtn.style.boxShadow = `0 20px 25px -5px ${data.color}20`;
+            
+            input.value = data.current;
+            unit.innerText = data.unit;
+
+            slider.min = data.min;
+            slider.max = data.max;
+            slider.value = data.current;
+            minVal.innerText = data.min.toFixed(1);
+            maxVal.innerText = data.max.toFixed(1);
+        }
+
+        // 입력창과 슬라이더 동기화
+        document.getElementById('data-slider').addEventListener('input', (e) => {
+            document.getElementById('main-input').value = e.target.value;
+        });
+
+        document.getElementById('main-input').addEventListener('input', (e) => {
+            document.getElementById('data-slider').value = e.target.value;
+        });
+
+        // 초기값 설정
+        window.onload = () => switchTab('weight');
+    </script>
+</body>
+</html>

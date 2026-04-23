@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: fitlog-server
+  config:
+    import: optional:file:./local-secrets.properties
+  profiles:
+    default: local
+  datasource:
+    url: jdbc:mysql://${db.host:localhost}:${db.port:3306}/${db.name:fitlog}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${db.username:root}
+    password: ${db.password:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        jdbc:
+          time_zone: Asia/Seoul
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FitLog backend server
+    java-version: ${java.version}
+
+app:
+  cors:
+    allowed-origins:
+      - ${web.origin:http://localhost:3000}
+      - http://127.0.0.1:3000

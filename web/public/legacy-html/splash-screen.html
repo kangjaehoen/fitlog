@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLog - 시작하기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes scale-in {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: scale-in 0.8s ease-out forwards;
+        }
+        /* 정적인 로고 스타일 */
+        .static-logo {
+            transform: none;
+        }
+    </style>
+</head>
+<body class="bg-indigo-600">
+
+    <div class="max-w-md mx-auto h-screen flex flex-col items-center justify-center py-16 px-8 relative overflow-hidden">
+        
+        <!-- 배경 장식 -->
+        <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+
+        <!-- 중앙 로고 영역 -->
+        <div class="flex flex-col items-center justify-center animate-fade-in">
+            <!-- 아이콘을 근육/힘을 상징하는 주먹(fa-fist-raised)으로 변경 -->
+            <div class="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 static-logo">
+                <i class="fa-solid fa-fist-raised text-4xl text-indigo-600"></i>
+            </div>
+            <h1 class="text-4xl font-black text-white tracking-tighter mb-2">FitLog</h1>
+            <p class="text-indigo-100 text-sm font-medium opacity-80">당신의 더 나은 내일을 위한 기록</p>
+        </div>
+
+        <!-- 하단 버전 정보 -->
+        <div class="absolute bottom-12 text-center animate-fade-in" style="animation-delay: 0.3s;">
+            <p class="text-indigo-200/60 text-[10px] font-medium tracking-widest uppercase">
+                Premium FitLog | v1.2.0
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // 일정 시간 후 메인 대시보드로 전환 시뮬레이션
+        window.onload = () => {
+            setTimeout(() => {
+                console.log("Loading complete. Redirecting to dashboard...");
+                // window.location.href = 'fitness_dashboard.html';
+            }, 2500);
+        };
+    </script>
+</body>
+</html>
