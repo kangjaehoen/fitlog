@@ -13,10 +13,10 @@ type HomeScreenProps = {
 
 export function HomeScreen({ dashboard }: HomeScreenProps) {
   return (
-    <div className="pb-40">
+    <div className="min-h-screen pb-[132px]">
       <HomeHeader />
 
-      <main className="mx-auto flex max-w-md flex-col gap-4 px-4 py-4">
+      <main className="mx-auto flex w-full max-w-[420px] flex-col gap-4 px-4 py-4">
         <RecordOverviewCard
           dateLabel={dashboard.dateLabel}
           recordChips={dashboard.recordChips}

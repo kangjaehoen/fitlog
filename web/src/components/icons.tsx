@@ -45,6 +45,15 @@ export function CalendarIcon({ className }: IconProps) {
   );
 }
 
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="m20 20-4.2-4.2" />
+    </IconBase>
+  );
+}
+
 export function HomeIcon({ className }: IconProps) {
   return (
     <IconBase className={className}>
@@ -128,6 +137,14 @@ export function FireIcon({ className }: IconProps) {
   );
 }
 
+export function BoltIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M13 2 6 13h5l-1 9 7-11h-5l1-9Z" />
+    </IconBase>
+  );
+}
+
 export function CheckCircleIcon({ className }: IconProps) {
   return (
     <IconBase className={className}>
@@ -171,6 +188,116 @@ export function ChevronRightIcon({ className }: IconProps) {
   return (
     <IconBase className={className}>
       <path d="m9 18 6-6-6-6" />
+    </IconBase>
+  );
+}
+
+export function MoreVerticalIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M12 5h.01" />
+      <path d="M12 12h.01" />
+      <path d="M12 19h.01" />
+    </IconBase>
+  );
+}
+
+export function XIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="m6 6 12 12" />
+      <path d="M18 6 6 18" />
+    </IconBase>
+  );
+}
+
+export function PencilIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="m5 19 3.5-.8L18 8.8 15.2 6 5.8 15.5 5 19Z" />
+      <path d="m13.8 7.4 2.8 2.8" />
+    </IconBase>
+  );
+}
+
+export function SettingsIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.7-.9 1 1 0 0 0-1.1.2l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.7 1 1 0 0 0-.2-1.1l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .7.9 1 1 0 0 0 1.1-.2l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.7Z" />
+    </IconBase>
+  );
+}
+
+export function CameraIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M5 8h2l1.5-2h7L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </IconBase>
+  );
+}
+
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M4 7h16" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M6 7l1 12h10l1-12" />
+      <path d="M9 4h6l1 3H8l1-3Z" />
+    </IconBase>
+  );
+}
+
+export function GripVerticalIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M10 6h.01" />
+      <path d="M10 12h.01" />
+      <path d="M10 18h.01" />
+      <path d="M14 6h.01" />
+      <path d="M14 12h.01" />
+      <path d="M14 18h.01" />
+    </IconBase>
+  );
+}
+
+export function InfoIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 10v5" />
+      <path d="M12 7h.01" />
+    </IconBase>
+  );
+}
+
+export function LogOutIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M9 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3" />
+      <path d="M13 16l4-4-4-4" />
+      <path d="M10 12h7" />
+    </IconBase>
+  );
+}
+
+export function ShieldIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3Z" />
+      <path d="m9.5 12 1.8 1.8 3.2-3.6" />
+    </IconBase>
+  );
+}
+
+export function HelpCircleIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2.1-2.5 4" />
+      <path d="M12 17h.01" />
     </IconBase>
   );
 }

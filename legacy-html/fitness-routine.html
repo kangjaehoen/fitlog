@@ -10,7 +10,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f8fafc;
-            padding-bottom: 180px; /* 하단 고정 버튼과 탭바 공간 확보 */
+            padding-bottom: 128px; /* 하단 고정 CTA 공간 확보 */
         }
         .routine-card {
             transition: all 0.2s ease;
@@ -18,37 +18,34 @@
         .routine-card:active {
             transform: scale(0.98);
         }
-        /* 하단 고정 영역 설정 */
         .fixed-bottom-container {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            z-index: 50;
+            z-index: 20;
             max-width: 448px; /* max-w-md와 동일 */
             margin: 0 auto;
         }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .cta-shell {
+            background: linear-gradient(to top, #f8fafc 58%, rgba(248, 250, 252, 0.95) 78%, rgba(248, 250, 252, 0));
         }
     </style>
 </head>
 <body>
 
-    <!-- 헤더 -->
-    <header class="p-5 bg-white sticky top-0 z-30 shadow-sm flex justify-between items-center">
-        <h1 class="text-xl font-bold text-slate-800">루틴</h1>
-        <div class="flex gap-2">
-            <button class="p-2 text-slate-400">
-                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+    <!-- 뒤로가기 헤더 -->
+    <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
+        <div class="relative mx-auto flex max-w-md items-center px-4 py-4">
+            <button
+                type="button"
+                onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='main.html'; }"
+                aria-label="뒤로가기"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+            >
+                <i class="fa-solid fa-chevron-left text-base"></i>
             </button>
-            <button class="p-2 text-slate-400">
-                <i class="fa-solid fa-gear text-lg"></i>
-            </button>
+            <h1 class="pointer-events-none absolute inset-x-0 text-center text-base font-bold text-slate-900">운동 루틴</h1>
         </div>
     </header>
 
@@ -142,35 +139,14 @@
 
     </main>
 
-    <!-- 하단 고정 영역 (버튼 + 탭바) -->
+    <!-- 하단 고정 CTA -->
     <div class="fixed-bottom-container">
-        <!-- 맞춤형 루틴 만들기 버튼: 탭바 바로 위에 고정 -->
-        <div class="px-4 pb-4">
+        <div class="cta-shell px-4 pb-6 pt-10">
             <button class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-[0_8px_25px_rgba(79,70,229,0.3)] flex items-center justify-center gap-2 active:scale-[0.97] transition-all border border-indigo-500/20">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
                 <span>맞춤형 루틴 만들기</span>
             </button>
         </div>
-
-        <!-- 하단 탭바 -->
-        <nav class="bg-white/90 backdrop-blur-xl border-t border-slate-100 h-[75px] flex items-center justify-around px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
-            <button class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-indigo-500 transition-colors">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-medium">홈</span>
-            </button>
-            <button class="flex flex-col items-center gap-1.5 text-indigo-600">
-                <i class="fa-solid fa-list-check text-lg"></i>
-                <span class="text-[10px] font-bold">루틴</span>
-            </button>
-            <button class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-indigo-500 transition-colors">
-                <i class="fa-solid fa-chart-simple text-lg"></i>
-                <span class="text-[10px] font-medium">통계</span>
-            </button>
-            <button class="flex flex-col items-center gap-1.5 text-slate-400 hover:text-indigo-500 transition-colors">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-[10px] font-medium">마이</span>
-            </button>
-        </nav>
     </div>
 
 </body>

@@ -2,14 +2,14 @@ import type { HomeDashboard } from "./types";
 
 export const homeDashboardMock: HomeDashboard = {
   todayRecordLabel: "오늘 기록",
-  dateLabel: "2026년 4월 4일 (토)",
-  recordChips: ["식단 3회", "운동 완료", "체중 기록"],
+  dateLabel: "2026년 4월 24일 (금)",
+  recordChips: ["식단 3회", "운동 완료", "신체 기록"],
   goalPercent: 80,
   nutritionStatus: "79% 달성",
   summaryCards: [
     { label: "칼로리", value: "1,820", subValue: "/ 2,300 kcal" },
     { label: "단백질", value: "128", subValue: "/ 160g" },
-    { label: "운동", value: "완료", status: "세션 저장됨" },
+    { label: "운동", value: "완료", status: "루틴 수행 완료" },
     { label: "체중", value: "71.2", subValue: "kg" },
   ],
   nutritionProgress: [
@@ -47,7 +47,7 @@ export const homeDashboardMock: HomeDashboard = {
     {
       label: "연속 기록",
       value: "6일",
-      helper: "로그 연속 유지 중",
+      helper: "로그를 이어가는 중",
       valueClass: "text-emerald-600",
     },
   ],

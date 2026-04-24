@@ -49,54 +49,50 @@
 <body>
 
     <!-- 헤더 영역 (프로필 요약) -->
-    <header class="profile-gradient p-8 pt-12 pb-16 text-white relative">
-        <div class="flex justify-end items-start mb-6">
+    <header class="profile-gradient px-5 pt-6 pb-10 text-white relative">
+        <div class="max-w-md mx-auto relative">
+        <div class="flex justify-end items-start mb-5">
             <!-- '마이 페이지' 문구 삭제됨 -->
-            <button class="p-2 bg-white/20 rounded-full backdrop-blur-sm active:scale-95 transition-transform">
-                <i class="fa-solid fa-gear"></i>
+            <button class="w-10 h-10 bg-white/20 rounded-full backdrop-blur-sm active:scale-95 transition-transform flex items-center justify-center">
+                <i class="fa-solid fa-gear text-sm"></i>
             </button>
         </div>
         
-        <div class="flex items-center gap-5">
+        <div class="flex items-start gap-4 pr-2">
             <div class="relative">
-                <div class="w-20 h-20 rounded-3xl bg-white/30 border-2 border-white/50 flex items-center justify-center overflow-hidden">
-                    <i class="fa-solid fa-user text-4xl text-white"></i>
+                <div class="w-16 h-16 rounded-[24px] bg-white/30 border-2 border-white/50 flex items-center justify-center overflow-hidden">
+                    <i class="fa-solid fa-user text-3xl text-white"></i>
                 </div>
                 <button class="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-indigo-600 rounded-full flex items-center justify-center shadow-lg text-[10px]">
                     <i class="fa-solid fa-camera"></i>
                 </button>
             </div>
-            <div class="space-y-1">
+            <div class="space-y-1 pt-1 min-w-0">
                 <div class="flex items-center gap-2">
                     <h2 id="profileDisplayName" class="text-2xl font-black">김운동님</h2>
                     <button type="button" id="openProfileEdit" class="w-8 h-8 shrink-0 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 active:scale-95 transition-all flex items-center justify-center text-white/90 hover:text-white" aria-label="프로필 수정">
                         <i class="fa-solid fa-pen text-[11px]"></i>
                     </button>
                 </div>
-                <p class="text-white/70 text-xs font-medium">운동 시작한 지 <span class="text-white font-bold">124일</span>째</p>
-                <div class="flex gap-2 mt-2">
-                    <span class="bg-white/20 text-[10px] px-2 py-0.5 rounded-full font-bold">Lv.4 숙련자</span>
-                    <span class="bg-white/20 text-[10px] px-2 py-0.5 rounded-full font-bold">🔥 5일 연속</span>
-                </div>
+                <p class="mb-4 text-white/70 text-xs font-medium">운동 시작한 지 <span class="text-white font-bold">124일</span>째</p>
             </div>
         </div>
 
         <!-- 성과 요약 카드 -->
-        <div class="absolute -bottom-10 left-5 right-5 bg-white rounded-3xl p-5 shadow-xl shadow-indigo-100 flex justify-around border border-slate-50">
-            <div class="text-center flex-1">
+        <div class="absolute -bottom-20 inset-x-4 bg-white rounded-3xl px-4 py-4 shadow-xl shadow-indigo-100 border border-slate-50 grid grid-cols-3">
+            <div class="text-center">
                 <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">이번 달 운동</p>
                 <p class="text-lg font-black text-slate-800">18회</p>
             </div>
-            <div class="w-px h-8 bg-slate-100 self-center"></div>
-            <div class="text-center flex-1">
+            <div class="text-center border-x border-slate-100">
                 <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">총 운동 시간</p>
                 <p class="text-lg font-black text-slate-800">86h</p>
             </div>
-            <div class="w-px h-8 bg-slate-100 self-center"></div>
-            <div class="text-center flex-1">
+            <div class="text-center">
                 <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">누적 볼륨</p>
                 <p class="text-lg font-black text-slate-800">42.5t</p>
             </div>
+        </div>
         </div>
     </header>
 
@@ -178,7 +174,7 @@
                 <div class="grid grid-cols-3 gap-2 pt-2">
                     <!-- 몸무게 (선택됨) -->
                     <button class="flex flex-col items-center p-3 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-100 ring-4 ring-indigo-50 border border-indigo-400/20">
-                        <span class="text-[9px] font-bold text-white/70 mb-1">몸무게</span>
+                        <span class="text-[9px] font-bold text-white mb-1">몸무게</span>
                         <span class="text-sm font-black italic">74.2 <span class="text-[8px] font-normal not-italic">kg</span></span>
                         <span class="text-[9px] font-bold mt-1.5 flex items-center gap-0.5"><i class="fa-solid fa-caret-down"></i> 0.4</span>
                     </button>
@@ -198,8 +194,10 @@
 
                 <!-- 기록 추가 버튼 -->
                 <button class="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-200">
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <i class="fa-solid fa-plus text-xs text-white"></i>
+                    <span class="text-white">
                     새로운 신체 데이터 기록
+                    </span>
                 </button>
             </div>
         </section>

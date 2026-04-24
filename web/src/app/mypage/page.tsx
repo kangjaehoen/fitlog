@@ -1,15 +1,12 @@
-import { LegacyScreen } from "@/components/legacy/legacy-screen";
+import { getProfileScreen } from "@/features/account/api";
+import { ProfileScreen } from "@/features/account/components/profile-screen";
 
 export const metadata = {
-  title: "My Page",
+  title: "마이 페이지",
 };
 
-export default function MyPage() {
-  return (
-    <LegacyScreen
-      title="마이페이지"
-      sourceFile="mypage.html"
-      current="mypage"
-    />
-  );
+export default async function MyPage() {
+  const profile = await getProfileScreen();
+
+  return <ProfileScreen profile={profile} />;
 }

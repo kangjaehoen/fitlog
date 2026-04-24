@@ -1,8 +1,8 @@
 import type { WeeklyAnalysis } from "./types";
 
 export const weeklyAnalysisMock: WeeklyAnalysis = {
-  weekLabel: "4월 1주차",
-  dateRange: "4월 1일 월요일 ~ 4월 7일 일요일",
+  weekLabel: "4월 4주차",
+  dateRange: "4월 21일 월요일 ~ 4월 27일 일요일",
   totalWorkout: "총 5시간 42분 운동했어요.",
   comparison: "지난주 대비 +15%",
   workoutBars: [
@@ -28,7 +28,7 @@ export const weeklyAnalysisMock: WeeklyAnalysis = {
     { label: "지방", value: "20%", color: "#f59e0b" },
   ],
   insight:
-    "이번 주 단백질 섭취량이 매우 좋습니다. 주말에는 탄수화물 비율만 조금 더 올려보세요.",
+    "이번 주 단백질 섭취 균형이 아주 좋았습니다. 주말에는 탄수화물 비중만 조금 조정해 보세요.",
   weightWindow: "최근 30일",
   weightBars: [
     { height: 64 },
