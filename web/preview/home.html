@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitLog Home Preview</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <h1 class="title">FitLog</h1>
+          <div class="icon-row">
+            <button class="icon-button" type="button" aria-label="알림">
+              <img src="./icons/bell.svg" alt="" />
+            </button>
+            <button class="icon-button" type="button" aria-label="캘린더">
+              <img src="./icons/calendar.svg" alt="" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="card card-pad home-card">
+          <h2 class="nutrition-title record-date">2026년 4월 4일 (토) 기록</h2>
+
+          <div class="record-chips">
+            <span class="record-chip">식단 3회</span>
+            <span class="record-chip">운동 완료</span>
+            <span class="record-chip">체중 기록</span>
+          </div>
+        </section>
+
+        <section class="card card-pad home-card">
+          <div class="summary-header">
+            <h2 class="summary-title">오늘 요약</h2>
+            <div class="summary-date">4월 4일(토)</div>
+          </div>
+
+          <div class="summary-grid">
+            <article class="summary-tile">
+              <div class="label">칼로리</div>
+              <div class="value-row">
+                <div class="value summary-value">1,820</div>
+                <div class="subvalue">/ 2,300 kcal</div>
+              </div>
+            </article>
+            <article class="summary-tile">
+              <div class="label">단백질</div>
+              <div class="value-row">
+                <div class="value summary-value">128</div>
+                <div class="subvalue">/ 160g</div>
+              </div>
+            </article>
+            <article class="summary-tile">
+              <div class="label">운동</div>
+              <div class="value-row center">
+                <svg
+                  class="summary-status-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <path d="m8.5 12 2.2 2.3 4.8-5"></path>
+                </svg>
+                <div class="value summary-value value-emerald">완료</div>
+              </div>
+            </article>
+            <article class="summary-tile">
+              <div class="label">체중</div>
+              <div class="value-row">
+                <div class="value summary-value">71.2</div>
+                <div class="subvalue">kg</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="card card-pad nutrition-card home-card">
+          <h2 class="nutrition-title">오늘 식단 현황</h2>
+
+          <div class="progress-list">
+            <div class="progress-row">
+              <div class="progress-label"><span>칼로리</span><span>79%</span></div>
+              <div class="progress-track"><div class="progress-bar bar-orange" style="width: 79%"></div></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label"><span>탄수화물</span><span>72%</span></div>
+              <div class="progress-track"><div class="progress-bar bar-sky" style="width: 72%"></div></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label"><span>단백질</span><span>80%</span></div>
+              <div class="progress-track"><div class="progress-bar bar-indigo" style="width: 80%"></div></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label"><span>지방</span><span>61%</span></div>
+              <div class="progress-track"><div class="progress-bar bar-amber" style="width: 61%"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card card-pad workout-box home-card">
+          <div class="split-row">
+            <div class="workout-copy">
+              <h2 class="nutrition-title workout-title">오늘 운동</h2>
+              <p class="subtle" style="font-size: 14px">오늘의 루틴: 가슴 + 어깨</p>
+            </div>
+            <div class="pill pill-indigo">3/5 완료</div>
+          </div>
+
+          <div class="metric-row">
+            <span class="metric-pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8"></circle>
+                <path d="M12 8v5l3 2"></path>
+              </svg>
+              48분
+            </span>
+            <span class="metric-pill orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3c2 2.3 3 4 3 6.1A3 3 0 0 1 18 12c0 4-2.5 7-6 7s-6-3-6-7c0-1.8.7-3.4 1.9-4.7.5 1.7 1.8 2.7 3.1 2.7 0-2.6.6-4.7 1-7Z"></path>
+              </svg>
+              342 kcal
+            </span>
+          </div>
+
+          <a class="primary-link" href="./home.html">이어서 운동 기록하기</a>
+        </section>
+
+        <section class="card card-pad home-card">
+          <div class="section-header-inline">
+            <div>
+              <h2>이번 주 요약</h2>
+              <p class="subtle">현재 React 화면 구성을 그대로 정적 프리뷰로 옮긴 버전</p>
+            </div>
+            <a class="link-inline" href="./weekly-record-analysis.html">상세 보기</a>
+          </div>
+
+          <div class="weekly-grid">
+            <article class="weekly-tile">
+              <div class="label">운동</div>
+              <div class="value">4회</div>
+              <div class="weekly-helper">이번 주 루틴 수행</div>
+            </article>
+            <article class="weekly-tile">
+              <div class="label">평균 칼로리</div>
+              <div class="value text-orange">2,180 kcal</div>
+              <div class="weekly-helper">최근 일주일 평균 섭취</div>
+            </article>
+            <article class="weekly-tile">
+              <div class="label">체중 변화</div>
+              <div class="value text-rose">+0.3kg</div>
+              <div class="weekly-helper">지난주 대비</div>
+            </article>
+            <article class="weekly-tile">
+              <div class="label">연속 기록</div>
+              <div class="value text-emerald">6일</div>
+              <div class="weekly-helper">로그 연속 유지 중</div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <div class="actions">
+        <div class="actions-grid">
+          <a class="action-link orange" href="./home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 3v7a2 2 0 0 0 2 2v9"></path>
+              <path d="M8 3v7"></path>
+              <path d="M12 3v7a2 2 0 0 1-2 2"></path>
+              <path d="M18 3c-1.33 1.2-2 3.13-2 5.8V21"></path>
+            </svg>
+            식단 기록하기
+          </a>
+          <a class="action-link indigo" href="./home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 10v4"></path>
+              <path d="M6 8v8"></path>
+              <path d="M18 8v8"></path>
+              <path d="M21 10v4"></path>
+              <path d="M6 12h12"></path>
+            </svg>
+            운동 기록하기
+          </a>
+        </div>
+      </div>
+
+      <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+          <a class="nav-link active" href="./home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 10.5 9-7 9 7"></path>
+              <path d="M5 9.5V20h14V9.5"></path>
+              <path d="M10 20v-5h4v5"></path>
+            </svg>
+            홈
+          </a>
+          <a class="nav-link" href="./home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 6h12"></path>
+              <path d="M8 12h12"></path>
+              <path d="M8 18h12"></path>
+              <path d="M4 6h.01"></path>
+              <path d="M4 12h.01"></path>
+              <path d="M4 18h.01"></path>
+            </svg>
+            루틴
+          </a>
+          <a class="nav-link" href="./weekly-record-analysis.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20h16"></path>
+              <path d="M7 16V9"></path>
+              <path d="M12 16V5"></path>
+              <path d="M17 16v-3"></path>
+            </svg>
+            통계
+          </a>
+          <a class="nav-link" href="./home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
+              <path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path>
+            </svg>
+            마이
+          </a>
+        </div>
+      </nav>
+    </div>
+  </body>
+</html>

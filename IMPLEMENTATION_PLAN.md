@@ -1,10 +1,18 @@
-# FitLog Next.js Implementation Plan
+# FitLog Frontend Implementation Plan
 
 ## 현재 상태
 
-- 원본 시안은 `legacy-html/`에 보관했습니다.
-- Figma MCP 기준으로 확인한 대표 화면은 `main(홈)`과 `weekly-record-analysis(주간 통계 분석)`입니다.
-- 실제 Next.js 프런트엔드는 `web/`에 생성했습니다.
+- 원본 시안은 `legacy-html/`에 보관합니다.
+- 실제 서비스 UI는 `web/`의 Next.js App Router에서 구현합니다.
+- 홈과 주간 분석은 Next.js 컴포넌트로 옮기고, 나머지 화면은 `legacy-html`을 임시로 미리보기 하는 마이그레이션 단계입니다.
+
+## 현재 프런트엔드 구조 원칙
+
+1. `app/**/page.tsx`는 라우트 엔트리만 담당합니다.
+2. 화면별 큰 JSX는 `features/*/components` 아래로 분리합니다.
+3. 공통 UI는 `components/` 아래에서 재사용합니다.
+4. 데이터 조회는 `lib/api-client.ts`와 feature별 `api.ts`에서 담당합니다.
+5. 백엔드 연동 전까지는 feature 내부 `mock-data.ts`를 사용하고, 실제 API가 열리면 feature `api.ts`만 교체합니다.
 
 ## 권장 폴더 구조
 
@@ -14,20 +22,37 @@ fitlog/
   web/
     src/
       app/
+        page.tsx
+        weekly-record-analysis/page.tsx
       components/
+        icons.tsx
+        legacy/
+        navigation/
+      features/
+        home/
+          api.ts
+          mock-data.ts
+          types.ts
+          components/
+        weekly-analysis/
+          api.ts
+          mock-data.ts
+          types.ts
+          components/
       lib/
+        api-client.ts
 ```
 
 ## 라우트 매핑
 
 | Legacy HTML | Next.js Route | 상태 |
 | --- | --- | --- |
-| `main.html` | `/` | 구현 시작 |
-| `weekly-record-analysis.html` | `/weekly-record-analysis` | 구현 시작 |
-| `fitness-routine.html` | `/fitness-routine` | 스캐폴드 |
-| `mypage.html` | `/mypage` | 스캐폴드 |
-| `today-meal-log.html` | `/today-meal-log` | 스캐폴드 |
-| `today-workout-log.html` | `/today-workout-log` | 스캐폴드 |
+| `main.html` | `/` | feature 구조로 이관 완료 |
+| `weekly-record-analysis.html` | `/weekly-record-analysis` | feature 구조로 이관 완료 |
+| `fitness-routine.html` | `/fitness-routine` | legacy 미리보기 유지 |
+| `mypage.html` | `/mypage` | legacy 미리보기 유지 |
+| `today-meal-log.html` | `/today-meal-log` | legacy 미리보기 유지 |
+| `today-workout-log.html` | `/today-workout-log` | legacy 미리보기 유지 |
 | `body-info.html` | `/body-info` | 다음 단계 |
 | `routine-edit.html` | `/routine-edit` | 다음 단계 |
 | `setting.html` | `/setting` | 다음 단계 |
@@ -35,86 +60,37 @@ fitlog/
 | `splash-screen.html` | `/splash-screen` | 다음 단계 |
 | `unsubscribe-guide.html` | `/unsubscribe-guide` | 다음 단계 |
 
-## 프런트엔드 구현 순서
+## 프런트엔드 구현 원칙
 
-1. `legacy-html`의 정적 마크업을 섹션 단위로 분해합니다.
-2. 공통 레이아웃, 하단 탭바, 카드, 진행바, 차트 UI를 `components/`로 분리합니다.
-3. 페이지는 기본적으로 Server Component로 두고, 데이터 조회는 `lib/`의 서버 함수에서 처리합니다.
-4. 모달, 슬라이더, 입력 동기화처럼 이벤트가 필요한 부분만 Client Component로 따로 분리합니다.
-5. 실제 API/DB가 붙으면 mock data를 교체합니다.
+### 1. 라우트 레이어
 
-## 서버단 권장 구성
+- `app/page.tsx`와 각 route의 `page.tsx`는 데이터를 가져오고 화면 컴포넌트를 조립하는 역할만 맡습니다.
+- 페이지 파일 안에는 복잡한 섹션 마크업과 반복 렌더링 로직을 오래 두지 않습니다.
 
-### 1. 기본 방향
+### 2. feature 레이어
 
-- 처음에는 **Next.js 단일 애플리케이션**으로 가는 것이 가장 효율적입니다.
-- 즉, 프런트와 백엔드를 분리된 서버 두 개로 시작하지 말고 `web/src/app` 안에서 함께 운영하는 구성이 적합합니다.
+- 홈, 주간 통계, 식단 기록, 운동 기록처럼 화면 단위 또는 도메인 단위로 `features/`를 나눕니다.
+- 한 feature 안에는 `components`, `types`, `api`, `mock-data`를 함께 둡니다.
+- 이렇게 하면 목데이터에서 실API로 바꿀 때 수정 범위가 해당 feature 안으로 제한됩니다.
 
-### 2. 추천 구성
+### 3. 공통 컴포넌트 레이어
 
-- UI 렌더링: Next.js App Router
-- 읽기 데이터 조회: Server Components
-- 쓰기 작업: Server Actions
-- 외부 연동/모바일 앱용 API: Route Handlers (`app/api/**/route.ts`)
-- 데이터베이스: PostgreSQL
-- ORM: Prisma
-- 인증: Auth.js 기반 소셜 로그인
-- 파일 저장: S3 호환 스토리지
+- 탭바, 공통 아이콘, legacy preview처럼 여러 route에서 재사용되는 UI는 `components/` 아래로 둡니다.
+- 현재는 `components/navigation/bottom-nav.tsx`와 `components/legacy/legacy-screen.tsx`가 대표 예시입니다.
 
-### 3. 왜 이 구성이 맞는가
+### 4. 데이터 접근 레이어
 
-- 현재 화면들이 운동, 식단, 신체 기록처럼 **관계형 데이터** 중심입니다.
-- `meal_logs`, `workout_logs`, `body_metrics`, `routines`, `users` 같이 테이블 관계가 명확해서 PostgreSQL이 잘 맞습니다.
-- 로그인 화면에 카카오, 구글, 애플이 이미 있으므로 인증 계층은 초기에 같이 설계하는 편이 좋습니다.
-- 폼 제출과 간단한 수정은 Server Action이 빠르고, 외부 소비 API나 webhook은 Route Handler로 분리하면 깔끔합니다.
+- 공통 fetch 래퍼는 `lib/api-client.ts`에 둡니다.
+- 실제 화면 데이터는 각 feature의 `api.ts`에서 읽습니다.
+- 로컬 개발 중 서버가 준비되지 않았으면 `FITLOG_USE_REAL_API=false` 상태로 mock data를 사용합니다.
+- 실제 Spring API가 준비되면 feature `api.ts`에서 `apiClient.get(...)` 경로만 교체합니다.
 
-## 서버 도메인 분리안
+## 백엔드 연동 방향
 
-### 핵심 도메인
-
-- `auth`: 회원, 세션, 소셜 로그인
-- `profile`: 닉네임, 목표, 알림 설정
-- `routines`: 운동 루틴, 운동 종목, 세트 템플릿
-- `meal-logs`: 식단 기록, 영양소 합계
-- `workout-logs`: 운동 세션, 세트 기록, 칼로리 계산
-- `body-metrics`: 체중, 골격근량, 체지방률
-- `analytics`: 주간 통계, 달성률, 인사이트
-
-### 권장 API 초안
-
-- `GET /api/me`
-- `PATCH /api/me`
-- `GET /api/routines`
-- `POST /api/routines`
-- `GET /api/meal-logs?date=YYYY-MM-DD`
-- `POST /api/meal-logs`
-- `GET /api/workout-logs?date=YYYY-MM-DD`
-- `POST /api/workout-logs`
-- `GET /api/body-metrics?range=30d`
-- `POST /api/body-metrics`
-- `GET /api/analytics/weekly?start=YYYY-MM-DD`
-
-## 데이터베이스 초안
-
-### 핵심 테이블
-
-- `users`
-- `profiles`
-- `goals`
-- `routines`
-- `routine_exercises`
-- `workout_sessions`
-- `workout_sets`
-- `meal_logs`
-- `meal_items`
-- `body_metrics`
-
-### 나중에 추가
-
-- `notifications`
-- `streaks`
-- `insight_snapshots`
-- `images`
+- 프런트는 Spring Boot 서버를 외부 API로 호출합니다.
+- 홈 대시보드는 추후 `GET /api/home/dashboard` 또는 유사 endpoint로 정리합니다.
+- 주간 분석은 `GET /api/analytics/weekly` 계열 endpoint로 연결합니다.
+- 루틴, 식단, 운동, 신체 데이터도 동일하게 feature별 `api.ts`에서 연결합니다.
 
 ## 마이그레이션 우선순위
 
@@ -124,11 +100,11 @@ fitlog/
 4. 식단 기록
 5. 마이페이지
 6. 신체 데이터 입력
-7. 설정/회원탈퇴/로그인
+7. 설정, 회원탈퇴, 로그인
 
 ## 바로 다음 작업
 
 1. `today-workout-log`, `today-meal-log`를 실제 입력 가능한 폼으로 전환
-2. Prisma 스키마 초안 생성
-3. Auth.js와 소셜 로그인 전략 확정
-4. `app/api` 또는 Server Action으로 CRUD 연결
+2. `fitness-routine`, `mypage`를 `features/*` 구조로 옮기기
+3. Spring API 스펙에 맞춰 feature별 `api.ts` 연결
+4. legacy preview route를 순차 제거

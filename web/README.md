@@ -1,34 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitLog Web
 
-## Getting Started
+`web/`은 FitLog의 Next.js 프런트엔드입니다.
 
-First, run the development server:
+## 구조
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+src/
+  app/                     # route entry
+  components/              # shared UI
+    legacy/
+    navigation/
+  features/                # feature-oriented UI and data access
+    home/
+    weekly-analysis/
+  lib/
+    api-client.ts          # shared fetch wrapper
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 개발 원칙
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `app/**/page.tsx`는 얇게 유지합니다.
+- 큰 화면 마크업은 `features/*/components`로 분리합니다.
+- 공통 탭바와 legacy preview는 `components/`에서 공유합니다.
+- 실제 API 연동은 feature별 `api.ts`에서 담당합니다.
+- 백엔드가 준비되기 전에는 feature 내부 `mock-data.ts`를 사용합니다.
 
-## Learn More
+## 환경 변수
 
-To learn more about Next.js, take a look at the following resources:
+- `FITLOG_USE_REAL_API=true`
+  - mock data 대신 실제 백엔드 API를 호출합니다.
+- `API_BASE_URL`
+  - 서버 API 기본 주소입니다. 기본값은 `http://localhost:8080`입니다.
+- `NEXT_PUBLIC_API_BASE_URL`
+  - 클라이언트 컴포넌트에서도 같은 API 주소를 써야 할 때 사용할 수 있습니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 실행
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+브라우저에서 `http://localhost:3000`을 열면 됩니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 프런트만 미리보기
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Node.js나 백엔드가 없는 환경에서는 `web/preview/`의 정적 화면을 바로 열어볼 수 있습니다.
+
+- 시작 파일: `web/preview/index.html`
+- 홈 화면: `web/preview/home.html`
+- 주간 분석: `web/preview/weekly-record-analysis.html`
+
+로컬 서버로 보고 싶으면 PowerShell에서 아래 스크립트를 실행하면 됩니다.
+
+```powershell
+cd c:\Users\hong\Desktop\fitlog\web
+powershell -ExecutionPolicy Bypass -File .\scripts\serve-preview.ps1
+```
+
+그다음 `http://127.0.0.1:4173`을 열면 됩니다.

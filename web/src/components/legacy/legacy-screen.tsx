@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BottomNav } from "@/components/bottom-nav";
+import { BottomNav } from "@/components/navigation/bottom-nav";
 
 type LegacyScreenProps = {
   title: string;
@@ -23,6 +23,7 @@ export function LegacyScreen({ title, sourceFile, current }: LegacyScreenProps) 
           <Link
             href={src}
             target="_blank"
+            rel="noreferrer"
             className="shrink-0 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-700"
           >
             새 창

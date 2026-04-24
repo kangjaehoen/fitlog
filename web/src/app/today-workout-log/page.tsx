@@ -1,4 +1,4 @@
-import { LegacyScreen } from "@/components/legacy-screen";
+import { LegacyScreen } from "@/components/legacy/legacy-screen";
 
 export const metadata = {
   title: "Workout Log",

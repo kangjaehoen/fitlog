@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BottomNav } from "@/components/bottom-nav";
+import { BottomNav } from "@/components/navigation/bottom-nav";
 
 type PlaceholderProps = {
   title: string;

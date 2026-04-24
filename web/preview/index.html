@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitLog Preview</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="preview-shell">
+      <section class="card preview-card">
+        <p class="eyebrow">Static Preview</p>
+        <h1 class="title">FitLog 프런트 화면 미리보기</h1>
+        <p class="preview-hint">
+          이 폴더는 Node.js, MySQL, Spring Boot 없이도 현재 프런트 구조를
+          시각적으로 확인할 수 있도록 만든 정적 프리뷰입니다.
+        </p>
+
+        <div class="preview-list">
+          <a class="preview-link" href="./home.html">
+            <span>홈 대시보드</span>
+            <span>→</span>
+          </a>
+          <a class="preview-link" href="./weekly-record-analysis.html">
+            <span>주간 분석</span>
+            <span>→</span>
+          </a>
+        </div>
+
+        <p class="preview-hint">
+          직접 열어도 되고, `web/scripts/serve-preview.ps1`로 로컬 서버를 띄워서
+          `http://localhost:4173`에서 볼 수도 있습니다.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
