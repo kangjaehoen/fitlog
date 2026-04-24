@@ -1,207 +1,204 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FitLog Weekly Preview</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div class="shell">
-      <header class="topbar">
-        <div class="topbar-inner topbar-stack">
-          <div class="section-header-inline">
-            <div>
-              <p class="eyebrow">Weekly Review</p>
-              <h1 class="title">통계</h1>
-            </div>
-            <button class="icon-button" type="button" aria-label="공유">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="18" cy="5" r="2"></circle>
-                <circle cx="6" cy="12" r="2"></circle>
-                <circle cx="18" cy="19" r="2"></circle>
-                <path d="m8 11 8-5"></path>
-                <path d="m8 13 8 5"></path>
-              </svg>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLog - 통계</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+            padding-bottom: 100px;
+        }
+        .chart-container {
+            height: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+        .chart-bar {
+            width: 30px;
+            background-color: #e2e8f0;
+            border-radius: 6px 6px 0 0;
+            position: relative;
+            transition: height 0.5s ease;
+        }
+        .chart-bar.active {
+            background-color: #4f46e5;
+        }
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        .bottom-nav-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header class="p-5 flex flex-col bg-white sticky top-0 z-30 shadow-sm gap-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">통계</h1>
+            <button class="p-2 text-slate-400 active:scale-95 transition-transform">
+                <i class="fa-solid fa-share-nodes"></i>
             </button>
-          </div>
-
-          <div class="week-switcher">
-            <div class="week-switcher-inner">
-              <button class="icon-button" type="button" aria-label="이전 주">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m15 18-6-6 6-6"></path>
-                </svg>
-              </button>
-              <div class="week-label">
-                <p class="week-title">4월 1주차</p>
-                <p class="pill pill-indigo">4월 1일 월요일 ~ 4월 7일 일요일</p>
-              </div>
-              <button class="icon-button" type="button" aria-label="다음 주" style="opacity: 0.5">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m9 18 6-6-6-6"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
-      </header>
-
-      <main class="page">
-        <section class="card card-pad">
-          <div class="chart-card-header">
-            <div>
-              <h2>주간 운동 시간</h2>
-              <p class="subtle" style="font-size: 14px">총 5시간 42분 운동했어요.</p>
+        
+        <!-- 주차 선택 컨트롤: 연도 제거 및 요청 형식 적용 -->
+        <div class="flex items-center justify-between bg-slate-50 rounded-2xl px-2 py-3 border border-slate-100">
+            <button class="w-10 h-10 flex items-center justify-center text-slate-400 active:bg-white active:rounded-xl active:shadow-sm transition-all">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="flex flex-col items-center">
+                <span class="text-base font-black text-slate-800 mb-0.5">4월 1주차</span>
+                <span class="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">
+                    4월 1일(월) ~ 4월 7일(일)
+                </span>
             </div>
-            <span class="pill pill-indigo">지난주 대비 +15%</span>
-          </div>
-
-          <div class="bar-chart">
-            <div class="bar-group"><div class="bar" style="height: 45%"></div><div class="bar-label">월</div></div>
-            <div class="bar-group"><div class="bar" style="height: 70%"></div><div class="bar-label">화</div></div>
-            <div class="bar-group"><div class="bar" style="height: 30%"></div><div class="bar-label">수</div></div>
-            <div class="bar-group"><div class="bar active" style="height: 85%"></div><div class="bar-label active">목</div></div>
-            <div class="bar-group"><div class="bar" style="height: 60%"></div><div class="bar-label">금</div></div>
-            <div class="bar-group"><div class="bar" style="height: 25%"></div><div class="bar-label">토</div></div>
-            <div class="bar-group"><div class="bar" style="height: 10%"></div><div class="bar-label">일</div></div>
-          </div>
-
-          <div class="kpis">
-            <article class="kpi">
-              <div class="label">성공한 세션</div>
-              <div class="value">12회</div>
-            </article>
-            <article class="kpi">
-              <div class="label">주간 소모 칼로리</div>
-              <div class="value text-orange">2,480 kcal</div>
-            </article>
-          </div>
-        </section>
-
-        <section class="card card-pad">
-          <h2 style="margin: 0">주간 영양 성분 비율</h2>
-
-          <div class="macro-layout">
-            <div class="donut">
-              <div class="donut-center">
-                <p class="subtle">상태</p>
-                <p style="margin: 2px 0 0; font-size: 13px; font-weight: 900">안정</p>
-              </div>
-            </div>
-
-            <div class="macro-list">
-              <div class="macro-row">
-                <span class="macro-label"><span class="macro-dot" style="background: #4f46e5"></span>단백질</span>
-                <strong>42%</strong>
-              </div>
-              <div class="macro-row">
-                <span class="macro-label"><span class="macro-dot" style="background: #60a5fa"></span>탄수화물</span>
-                <strong>38%</strong>
-              </div>
-              <div class="macro-row">
-                <span class="macro-label"><span class="macro-dot" style="background: #f59e0b"></span>지방</span>
-                <strong>20%</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="insight">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m12 3 1.1 3.4L16.5 7.5l-3.4 1.1L12 12l-1.1-3.4L7.5 7.5l3.4-1.1L12 3Z"></path>
-              <path d="m18 13 .6 1.8 1.9.6-1.9.6L18 18l-.6-1.9-1.9-.6 1.9-.6L18 13Z"></path>
-              <path d="m6 14 .8 2.2L9 17l-2.2.8L6 20l-.8-2.2L3 17l2.2-.8L6 14Z"></path>
-            </svg>
-            <div>
-              <strong>AI 분석:</strong>
-              이번 주 단백질 섭취량이 매우 좋습니다. 주말에는 탄수화물 비율만
-              조금 더 올려보세요.
-            </div>
-          </div>
-        </section>
-
-        <section class="card card-pad">
-          <div class="weight-header">
-            <h2>체중 트렌드</h2>
-            <span class="pill pill-indigo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 20h16"></path>
-                <path d="M7 16V9"></path>
-                <path d="M12 16V5"></path>
-                <path d="M17 16v-3"></path>
-              </svg>
-              최근 30일
-            </span>
-          </div>
-
-          <div class="weight-card">
-            <div class="weight-chart">
-              <div class="weight-bar" style="height: 64%"></div>
-              <div class="weight-bar" style="height: 55%"></div>
-              <div class="weight-bar" style="height: 58%"></div>
-              <div class="weight-bar" style="height: 46%"></div>
-              <div class="weight-bar active" style="height: 38%"></div>
-              <div class="weight-bar active" style="height: 31%"></div>
-              <div class="weight-bar active" style="height: 25%"></div>
-            </div>
-
-            <div class="weight-stats">
-              <div class="weight-stat">
-                <div class="label">시작</div>
-                <div class="value">73.5kg</div>
-              </div>
-              <div class="weight-stat">
-                <div class="label">현재</div>
-                <div class="value">71.2kg</div>
-              </div>
-              <div class="weight-stat">
-                <div class="label">감량</div>
-                <div class="value" style="color: #4f46e5">-2.3kg</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <nav class="bottom-nav">
-        <div class="bottom-nav-inner">
-          <a class="nav-link" href="./home.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m3 10.5 9-7 9 7"></path>
-              <path d="M5 9.5V20h14V9.5"></path>
-              <path d="M10 20v-5h4v5"></path>
-            </svg>
-            홈
-          </a>
-          <a class="nav-link" href="./home.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 6h12"></path>
-              <path d="M8 12h12"></path>
-              <path d="M8 18h12"></path>
-              <path d="M4 6h.01"></path>
-              <path d="M4 12h.01"></path>
-              <path d="M4 18h.01"></path>
-            </svg>
-            루틴
-          </a>
-          <a class="nav-link active" href="./weekly-record-analysis.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20h16"></path>
-              <path d="M7 16V9"></path>
-              <path d="M12 16V5"></path>
-              <path d="M17 16v-3"></path>
-            </svg>
-            통계
-          </a>
-          <a class="nav-link" href="./home.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
-              <path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path>
-            </svg>
-            마이
-          </a>
+            <button class="w-10 h-10 flex items-center justify-center text-slate-200 cursor-not-allowed">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
-      </nav>
-    </div>
-  </body>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+
+        <!-- 주간 운동 분석 -->
+        <section class="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+                <div class="space-y-0.5">
+                    <h2 class="font-bold text-slate-800">주간 운동 시간</h2>
+                    <p class="text-[11px] text-slate-400">총 5시간 42분 활동함</p>
+                </div>
+                <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">지난주 대비 +15%</span>
+            </div>
+            
+            <div class="chart-container px-2">
+                <div class="chart-bar h-[45%]"><span class="chart-label">월</span></div>
+                <div class="chart-bar h-[70%]"><span class="chart-label">화</span></div>
+                <div class="chart-bar h-[30%]"><span class="chart-label">수</span></div>
+                <div class="chart-bar active h-[85%]"><span class="chart-label">목</span></div>
+                <div class="chart-bar h-[60%]"><span class="chart-label">금</span></div>
+                <div class="chart-bar h-[25%]"><span class="chart-label">토</span></div>
+                <div class="chart-bar h-[10%]"><span class="chart-label">일</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-8 pt-5 border-t border-slate-50">
+                <div class="bg-slate-50/50 p-3 rounded-2xl">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-tight">성공한 세션</p>
+                    <p class="text-lg font-black text-slate-800">12회</p>
+                </div>
+                <div class="bg-slate-50/50 p-3 rounded-2xl">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-tight">주간 소모 칼로리</p>
+                    <p class="text-lg font-black text-orange-500">2,480 kcal</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 식단 영양 성분 분석 -->
+        <section class="bg-white rounded-3xl p-6 shadow-sm space-y-5">
+            <h2 class="font-bold text-slate-800">주간 영양 성분 비율</h2>
+            <div class="flex items-center gap-8">
+                <div class="relative w-24 h-24 rounded-full border-[12px] border-slate-100 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-[12px] border-indigo-500" style="clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%);"></div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-slate-400 font-bold">상태</span>
+                        <span class="text-xs font-black text-slate-700">안정</span>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-3">
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div><span class="text-slate-500 font-medium">단백질</span></div>
+                        <span class="font-bold text-slate-800">42%</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-blue-400"></div><span class="text-slate-500 font-medium">탄수화물</span></div>
+                        <span class="font-bold text-slate-800">38%</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div><span class="text-slate-500 font-medium">지방</span></div>
+                        <span class="font-bold text-slate-800">20%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">
+                <p class="text-[11px] text-indigo-700 leading-relaxed">
+                    <i class="fa-solid fa-sparkles mr-1"></i> <span class="font-bold">AI 분석:</span> 이번 주 단백질 섭취량이 매우 양호합니다. 주말에 탄수화물 비율만 조금 낮춰보세요!
+                </p>
+            </div>
+        </section>
+
+        <!-- 체중 변화 트렌드 -->
+        <section class="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="font-bold text-slate-800">체중 트렌드</h2>
+                <div class="flex items-center gap-1 text-[11px] font-bold text-indigo-600">
+                    <span>최근 30일</span>
+                    <i class="fa-solid fa-caret-down"></i>
+                </div>
+            </div>
+            <div class="flex items-end justify-between h-20 px-2 pt-4 border-b border-slate-100">
+                <div class="w-1.5 h-12 bg-slate-100 rounded-full"></div>
+                <div class="w-1.5 h-10 bg-slate-100 rounded-full"></div>
+                <div class="w-1.5 h-11 bg-slate-100 rounded-full"></div>
+                <div class="w-1.5 h-9 bg-slate-100 rounded-full"></div>
+                <div class="w-1.5 h-8 bg-indigo-500 rounded-full"></div>
+                <div class="w-1.5 h-7 bg-indigo-500 rounded-full"></div>
+                <div class="w-1.5 h-6 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.3)]"></div>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+                <div class="text-center flex-1">
+                    <p class="text-[10px] text-slate-400 font-bold mb-0.5">시작</p>
+                    <p class="text-sm font-bold text-slate-800">73.5kg</p>
+                </div>
+                <div class="w-px h-6 bg-slate-100"></div>
+                <div class="text-center flex-1">
+                    <p class="text-[10px] text-slate-400 font-bold mb-0.5">현재</p>
+                    <p class="text-sm font-bold text-slate-800">71.2kg</p>
+                </div>
+                <div class="w-px h-6 bg-slate-100"></div>
+                <div class="text-center flex-1">
+                    <p class="text-[10px] text-indigo-600 font-bold mb-0.5">감량</p>
+                    <p class="text-sm font-black text-indigo-600">-2.3kg</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 하단 탭바 -->
+    <nav class="bottom-nav-fixed bg-white/80 backdrop-blur-lg border-t border-slate-100 h-[75px] flex items-center justify-around px-2 max-w-md mx-auto">
+        <button class="flex flex-col items-center gap-1.5 text-slate-400">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px] font-medium">홈</span>
+        </button>
+        <button class="flex flex-col items-center gap-1.5 text-slate-400">
+            <i class="fa-solid fa-list-check text-lg"></i>
+            <span class="text-[10px] font-medium">루틴</span>
+        </button>
+        <button class="flex flex-col items-center gap-1.5 text-indigo-600">
+            <i class="fa-solid fa-chart-simple text-lg"></i>
+            <span class="text-[10px] font-bold">통계</span>
+        </button>
+        <button class="flex flex-col items-center gap-1.5 text-slate-400">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-[10px] font-medium">마이</span>
+        </button>
+    </nav>
+
+</body>
 </html>

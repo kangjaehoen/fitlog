@@ -9,7 +9,7 @@ export function NutritionProgressSection({
   nutritionProgress,
 }: NutritionProgressSectionProps) {
   return (
-    <section className="rounded-[28px] border border-indigo-100 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
+    <section className="rounded-[28px] border border-[#c7d2fe] bg-white/90 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-[8px]">
       <div className="mb-6">
         <h2 className="text-[18px] font-black leading-none text-slate-900">
           오늘 식단 현황

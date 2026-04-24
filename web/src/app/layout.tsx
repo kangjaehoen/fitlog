@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     default: "FitLog",
     template: "%s | FitLog",
   },
-  description: "운동, 식단, 신체 기록을 한 곳에서 관리하는 FitLog 프런트엔드",
+  description: "운동, 식단, 신체 기록을 한 곳에서 관리하는 FitLog 프론트입니다.",
   applicationName: "FitLog",
 };
 

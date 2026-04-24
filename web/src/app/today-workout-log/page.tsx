@@ -1,15 +1,12 @@
-import { LegacyScreen } from "@/components/legacy/legacy-screen";
+import { getWorkoutLog } from "@/features/recording/api";
+import { WorkoutLogScreen } from "@/features/recording/components/workout-log-screen";
 
 export const metadata = {
-  title: "Workout Log",
+  title: "운동 기록하기",
 };
 
-export default function TodayWorkoutLogPage() {
-  return (
-    <LegacyScreen
-      title="오늘 운동 기록"
-      sourceFile="today-workout-log.html"
-      current="home"
-    />
-  );
+export default async function TodayWorkoutLogPage() {
+  const workoutLog = await getWorkoutLog();
+
+  return <WorkoutLogScreen data={workoutLog} />;
 }

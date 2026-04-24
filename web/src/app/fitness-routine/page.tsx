@@ -1,15 +1,12 @@
-import { LegacyScreen } from "@/components/legacy/legacy-screen";
+import { getRoutineOverview } from "@/features/routine/api";
+import { RoutineScreen } from "@/features/routine/components/routine-screen";
 
 export const metadata = {
-  title: "Routine",
+  title: "운동 루틴",
 };
 
-export default function FitnessRoutinePage() {
-  return (
-    <LegacyScreen
-      title="운동 루틴"
-      sourceFile="fitness-routine.html"
-      current="routine"
-    />
-  );
+export default async function FitnessRoutinePage() {
+  const overview = await getRoutineOverview();
+
+  return <RoutineScreen overview={overview} />;
 }

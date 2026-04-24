@@ -7,9 +7,7 @@ type DailySummarySectionProps = {
 };
 
 function formatSummaryDate(dateLabel: string) {
-  return dateLabel
-    .replace(/^\d{4}년\s*/, "")
-    .replace(/\s+\((.)\)/, "($1)");
+  return dateLabel.replace(/^\d{4}년\s*/, "");
 }
 
 export function DailySummarySection({
@@ -17,7 +15,7 @@ export function DailySummarySection({
   summaryCards,
 }: DailySummarySectionProps) {
   return (
-    <section className="rounded-[28px] border border-indigo-100 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
+    <section className="rounded-[28px] border border-[#c7d2fe] bg-white/90 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-[8px]">
       <div className="mb-4 flex items-start justify-between gap-3">
         <h2 className="text-[18px] font-black leading-none text-slate-900">
           오늘 요약
@@ -31,7 +29,7 @@ export function DailySummarySection({
         {summaryCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-100"
+            className="rounded-[22px] bg-slate-50 p-3.5 ring-1 ring-slate-200"
           >
             <p className="text-[11px] font-medium text-slate-500">{card.label}</p>
             <div

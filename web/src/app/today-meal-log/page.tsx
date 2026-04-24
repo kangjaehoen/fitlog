@@ -1,15 +1,12 @@
-import { LegacyScreen } from "@/components/legacy/legacy-screen";
+import { getMealLog } from "@/features/recording/api";
+import { MealLogScreen } from "@/features/recording/components/meal-log-screen";
 
 export const metadata = {
-  title: "Meal Log",
+  title: "식단 기록",
 };
 
-export default function TodayMealLogPage() {
-  return (
-    <LegacyScreen
-      title="오늘 식단 기록"
-      sourceFile="today-meal-log.html"
-      current="home"
-    />
-  );
+export default async function TodayMealLogPage() {
+  const mealLog = await getMealLog();
+
+  return <MealLogScreen data={mealLog} />;
 }

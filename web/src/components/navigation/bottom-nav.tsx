@@ -32,8 +32,8 @@ const items: Array<{
 
 export function BottomNav({ current }: { current: NavKey }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/70 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-[78px] max-w-md items-center justify-around px-2">
+    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-white/70 bg-white/90 backdrop-blur-[20px]">
+      <div className="mx-auto flex h-[78px] w-full max-w-[420px] items-center justify-around px-2">
         {items.map((item) => {
           const active = item.key === current;
           const Icon = item.icon;
@@ -43,7 +43,7 @@ export function BottomNav({ current }: { current: NavKey }) {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`flex min-w-16 flex-col items-center gap-1.5 rounded-2xl px-3 py-2 text-[11px] font-semibold transition ${
+              className={`flex min-w-16 flex-col items-center gap-1.5 rounded-[18px] px-3 py-2 text-[11px] font-bold transition ${
                 active
                   ? "text-indigo-600"
                   : "text-slate-400 hover:text-slate-600"
