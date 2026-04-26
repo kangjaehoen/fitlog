@@ -19,13 +19,4 @@ export type WeeklyAnalysis = {
     color: string;
   }>;
   insight: string;
-  weightWindow: string;
-  weightBars: Array<{
-    height: number;
-  }>;
-  weightStats: Array<{
-    label: string;
-    value: string;
-    valueClass: string;
-  }>;
 };

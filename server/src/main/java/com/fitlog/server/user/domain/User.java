@@ -21,7 +21,8 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "users",
 	indexes = {
-		@Index(name = "idx_users_status", columnList = "status")
+		@Index(name = "idx_users_status", columnList = "status"),
+		@Index(name = "idx_users_provider", columnList = "provider")
 	},
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_users_email_provider", columnNames = {"email", "provider"}),
@@ -40,7 +41,7 @@ public class User extends BaseTimeEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "provider", nullable = false, length = 20)
-	private AuthProvider provider;
+	private SocialType socialType;
 
 	@Column(name = "provider_user_id", nullable = false, length = 100)
 	private String providerUserId;

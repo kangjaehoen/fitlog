@@ -1,8 +1,7 @@
 package com.fitlog.server.user.domain;
 
-public enum AuthProvider {
-	LOCAL,
-	GOOGLE,
+public enum SocialType {
 	KAKAO,
+	GOOGLE,
 	APPLE
 }

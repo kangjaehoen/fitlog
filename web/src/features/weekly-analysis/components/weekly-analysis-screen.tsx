@@ -1,6 +1,5 @@
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import type { WeeklyAnalysis } from "../types";
-import { WeightTrendSection } from "./weight-trend-section";
 import { WeeklyAnalysisHeader } from "./weekly-analysis-header";
 import { WeeklyMacrosSection } from "./weekly-macros-section";
 import { WeeklyWorkoutSection } from "./weekly-workout-section";
@@ -29,11 +28,6 @@ export function WeeklyAnalysisScreen({
         <WeeklyMacrosSection
           macros={analysis.macros}
           insight={analysis.insight}
-        />
-        <WeightTrendSection
-          weightWindow={analysis.weightWindow}
-          weightBars={analysis.weightBars}
-          weightStats={analysis.weightStats}
         />
       </main>
 

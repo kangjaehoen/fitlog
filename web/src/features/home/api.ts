@@ -1,8 +1,7 @@
 import { apiClient } from "@/lib/api-client";
+import { useRealApi } from "@/lib/api-mode";
 import { homeDashboardMock } from "./mock-data";
 import type { HomeDashboard } from "./types";
-
-const useRealApi = process.env.FITLOG_USE_REAL_API === "true";
 
 export async function getHomeDashboard(): Promise<HomeDashboard> {
   if (!useRealApi) {
