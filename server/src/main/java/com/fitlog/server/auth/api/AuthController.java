@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fitlog.server.auth.application.AuthService;
+import com.fitlog.server.auth.application.KakaoOAuthException;
+import com.fitlog.server.auth.application.KakaoOAuthService;
 import com.fitlog.server.user.domain.SocialType;
 
 import jakarta.validation.Valid;
@@ -24,9 +26,11 @@ import jakarta.validation.constraints.NotNull;
 public class AuthController {
 
 	private final AuthService authService;
+	private final KakaoOAuthService kakaoOAuthService;
 
-	public AuthController(AuthService authService) {
+	public AuthController(AuthService authService, KakaoOAuthService kakaoOAuthService) {
 		this.authService = authService;
+		this.kakaoOAuthService = kakaoOAuthService;
 	}
 
 	@PostMapping("/login")
@@ -37,6 +41,21 @@ public class AuthController {
 			request.email().trim(),
 			request.nickname().trim()
 		));
+	}
+
+	@GetMapping("/kakao/authorize-url")
+	public KakaoAuthorizeUrlResponse kakaoAuthorizeUrl() {
+		return new KakaoAuthorizeUrlResponse(this.kakaoOAuthService.getAuthorizationUrl());
+	}
+
+	@PostMapping("/kakao/callback")
+	public ResponseEntity<AuthService.AuthResponse> kakaoCallback(@Valid @RequestBody KakaoCallbackRequest request) {
+		try {
+			return ResponseEntity.ok(this.kakaoOAuthService.login(request.code()));
+		}
+		catch (KakaoOAuthException exception) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
 	}
 
 	@GetMapping("/me")
@@ -70,5 +89,11 @@ public class AuthController {
 		@NotBlank @Email String email,
 		@NotBlank String nickname
 	) {
+	}
+
+	public record KakaoAuthorizeUrlResponse(String authorizationUrl) {
+	}
+
+	public record KakaoCallbackRequest(@NotBlank String code) {
 	}
 }

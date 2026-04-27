@@ -10,6 +10,11 @@ spring:
     open-in-view: false
 
 app:
+  oauth:
+    kakao:
+      client-id: test-kakao-client-id
+      client-secret: test-kakao-client-secret
+      redirect-uri: http://localhost:3000/auth/kakao/callback
   cors:
     allowed-origins:
       - http://localhost:3000

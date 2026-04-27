@@ -40,6 +40,11 @@ app:
   auth:
     token-secret: ${AUTH_TOKEN_SECRET:fitlog-local-dev-secret}
     token-validity-hours: ${AUTH_TOKEN_VALIDITY_HOURS:168}
+  oauth:
+    kakao:
+      client-id: ${KAKAO_CLIENT_ID:}
+      client-secret: ${KAKAO_CLIENT_SECRET:}
+      redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/auth/kakao/callback}
   cors:
     allowed-origins:
       - ${web.origin:http://localhost:3000}

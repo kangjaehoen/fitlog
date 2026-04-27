@@ -1,8 +1,11 @@
-import { getHomeDashboard } from "@/features/home/api";
-import { HomeScreen } from "@/features/home/components/home-screen";
+import { getSocialLogin, getSplash } from "@/features/account/api";
+import { SplashScreen } from "@/features/account/components/splash-screen";
 
 export default async function HomePage() {
-  const dashboard = await getHomeDashboard();
+  const [splash, socialLogin] = await Promise.all([
+    getSplash(),
+    getSocialLogin(),
+  ]);
 
-  return <HomeScreen dashboard={dashboard} />;
+  return <SplashScreen data={splash} loginData={socialLogin} />;
 }

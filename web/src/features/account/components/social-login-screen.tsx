@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginWithSocialProvider } from "../api";
+import { getSocialLoginRedirectUrl, loginWithSocialProvider } from "../api";
 import { persistAuthSession } from "../auth-session";
 import type { SocialLoginData } from "../types";
+import { FitLogMark, ProviderLogo } from "./brand-icons";
 
 type SocialLoginScreenProps = {
   data: SocialLoginData;
@@ -30,6 +31,12 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
     setErrorMessage(null);
 
     try {
+      const redirectUrl = await getSocialLoginRedirectUrl(providerType);
+      if (redirectUrl) {
+        window.location.assign(redirectUrl);
+        return;
+      }
+
       const response = await loginWithSocialProvider(providerType);
       persistAuthSession(response);
       router.push("/main");
@@ -44,6 +51,9 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
     <div className="flex min-h-screen items-center justify-center bg-white px-4">
       <main className="w-full max-w-[360px] rounded-[32px] border border-slate-100 bg-slate-50/60 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
         <div className="mb-6 text-center">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-[20px] bg-white text-[#5a4df3] shadow-[0_18px_38px_rgba(79,70,229,0.14)]">
+            <FitLogMark className="size-9" />
+          </div>
           <p className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">
             Welcome
           </p>
@@ -65,8 +75,17 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
                 disabled={loadingProvider !== null}
                 className={`flex h-14 w-full items-center justify-center gap-3 rounded-[16px] text-[16px] font-bold transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${toneStyles[option.tone]}`}
               >
-                <span className="flex size-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-slate-900">
-                  {option.provider}
+                <span
+                  className={`flex size-7 items-center justify-center ${
+                    option.providerType === "APPLE"
+                      ? "text-white"
+                      : "text-[#191919]"
+                  }`}
+                >
+                  <ProviderLogo
+                    providerType={option.providerType}
+                    className="size-5"
+                  />
                 </span>
                 <span>{loading ? "로그인 중..." : option.label}</span>
               </button>

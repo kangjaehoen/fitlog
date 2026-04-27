@@ -1,5 +1,6 @@
 package com.fitlog.server.auth.api;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -60,5 +61,15 @@ class AuthControllerTest {
 	void currentUserRejectsMissingToken() throws Exception {
 		this.mockMvc.perform(get("/api/auth/me"))
 			.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void kakaoAuthorizeUrlUsesConfiguredClientAndRedirectUri() throws Exception {
+		this.mockMvc.perform(get("/api/auth/kakao/authorize-url"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.authorizationUrl", containsString("https://kauth.kakao.com/oauth/authorize")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("response_type=code")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("client_id=test-kakao-client-id")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("redirect_uri=http://localhost:3000/auth/kakao/callback")));
 	}
 }

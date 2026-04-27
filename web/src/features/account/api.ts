@@ -18,6 +18,9 @@ import type {
 } from "./types";
 
 type AuthProvider = AuthResponse["user"]["socialType"];
+type KakaoAuthorizeUrlResponse = {
+  authorizationUrl: string;
+};
 
 const demoLoginPayloads: Record<AuthProvider, {
   socialType: AuthProvider;
@@ -78,6 +81,33 @@ export async function loginWithSocialProvider(
   return apiClient.post<AuthResponse>("/api/auth/login", payload, {
     cache: "no-store",
   });
+}
+
+export async function getSocialLoginRedirectUrl(
+  providerType: AuthProvider,
+): Promise<string | null> {
+  if (providerType !== "KAKAO" || !useRealApi) {
+    return null;
+  }
+
+  const response = await apiClient.get<KakaoAuthorizeUrlResponse>(
+    "/api/auth/kakao/authorize-url",
+    {
+      cache: "no-store",
+    },
+  );
+
+  return response.authorizationUrl;
+}
+
+export async function loginWithKakaoCode(code: string): Promise<AuthResponse> {
+  return apiClient.post<AuthResponse>(
+    "/api/auth/kakao/callback",
+    { code },
+    {
+      cache: "no-store",
+    },
+  );
 }
 
 export async function getCurrentUser(token: string): Promise<AuthUser> {

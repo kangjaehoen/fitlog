@@ -1,4 +1,4 @@
-import { getSplash } from "@/features/account/api";
+import { getSocialLogin, getSplash } from "@/features/account/api";
 import { SplashScreen } from "@/features/account/components/splash-screen";
 
 export const metadata = {
@@ -6,7 +6,10 @@ export const metadata = {
 };
 
 export default async function SplashPage() {
-  const data = await getSplash();
+  const [data, loginData] = await Promise.all([
+    getSplash(),
+    getSocialLogin(),
+  ]);
 
-  return <SplashScreen data={data} />;
+  return <SplashScreen data={data} loginData={loginData} />;
 }
