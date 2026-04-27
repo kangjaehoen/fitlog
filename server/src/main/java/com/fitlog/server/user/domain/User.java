@@ -49,4 +49,15 @@ public class User extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 20)
 	private UserStatus status = UserStatus.ACTIVE;
+
+	private User(String email, SocialType socialType, String providerUserId) {
+		this.email = email;
+		this.socialType = socialType;
+		this.providerUserId = providerUserId;
+		this.status = UserStatus.ACTIVE;
+	}
+
+	public static User createSocialUser(String email, SocialType socialType, String providerUserId) {
+		return new User(email, socialType, providerUserId);
+	}
 }

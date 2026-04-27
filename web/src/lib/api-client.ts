@@ -4,6 +4,7 @@ const API_BASE_URL =
   "http://localhost:8080";
 
 type RequestOptions = Omit<RequestInit, "method">;
+type MutationOptions = Omit<RequestInit, "body" | "method">;
 
 function buildUrl(path: string) {
   return path.startsWith("http")
@@ -32,6 +33,13 @@ export const apiClient = {
     return request<T>(path, {
       ...options,
       method: "GET",
+    });
+  },
+  post<T>(path: string, body?: unknown, options?: MutationOptions) {
+    return request<T>(path, {
+      ...options,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      method: "POST",
     });
   },
 };

@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { useRealApi } from "@/lib/api-mode";
+import { allowMockFallback, useRealApi } from "@/lib/api-mode";
 import { homeDashboardMock } from "./mock-data";
 import type { HomeDashboard } from "./types";
 
@@ -8,7 +8,15 @@ export async function getHomeDashboard(): Promise<HomeDashboard> {
     return homeDashboardMock;
   }
 
-  return apiClient.get<HomeDashboard>("/api/home/dashboard", {
-    cache: "no-store",
-  });
+  try {
+    return await apiClient.get<HomeDashboard>("/api/home/dashboard", {
+      cache: "no-store",
+    });
+  } catch (error) {
+    if (allowMockFallback) {
+      return homeDashboardMock;
+    }
+
+    throw error;
+  }
 }

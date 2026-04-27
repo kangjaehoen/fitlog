@@ -112,18 +112,21 @@ export const socialLoginMock: SocialLoginData = {
   options: [
     {
       provider: "K",
+      providerType: "KAKAO",
       label: "카카오로 시작하기",
       href: "/",
       tone: "kakao",
     },
     {
       provider: "G",
+      providerType: "GOOGLE",
       label: "Google로 시작하기",
       href: "/",
       tone: "google",
     },
     {
       provider: "A",
+      providerType: "APPLE",
       label: "Apple로 시작하기",
       href: "/",
       tone: "apple",

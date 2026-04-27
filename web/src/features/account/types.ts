@@ -55,10 +55,24 @@ export type SocialLoginData = {
   subtitle: string;
   options: Array<{
     provider: string;
+    providerType: "KAKAO" | "GOOGLE" | "APPLE";
     label: string;
     href: string;
     tone: "kakao" | "google" | "apple";
   }>;
+};
+
+export type AuthUser = {
+  id: number;
+  email: string;
+  socialType: "KAKAO" | "GOOGLE" | "APPLE";
+  nickname: string;
+};
+
+export type AuthResponse = {
+  token: string;
+  expiresAt: string;
+  user: AuthUser;
 };
 
 export type SplashData = {

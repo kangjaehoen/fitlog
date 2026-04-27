@@ -3,8 +3,8 @@ import type { WeeklyAnalysis } from "../types";
 
 type WeightTrendSectionProps = {
   weightWindow: string;
-  weightBars: WeeklyAnalysis["weightBars"];
-  weightStats: WeeklyAnalysis["weightStats"];
+  weightBars: NonNullable<WeeklyAnalysis["weightBars"]>;
+  weightStats: NonNullable<WeeklyAnalysis["weightStats"]>;
 };
 
 export function WeightTrendSection({

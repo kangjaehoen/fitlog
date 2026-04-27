@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { useRealApi } from "@/lib/api-mode";
+import { allowMockFallback, useRealApi } from "@/lib/api-mode";
 import { weeklyAnalysisMock } from "./mock-data";
 import type { WeeklyAnalysis } from "./types";
 
@@ -8,7 +8,15 @@ export async function getWeeklyAnalysis(): Promise<WeeklyAnalysis> {
     return weeklyAnalysisMock;
   }
 
-  return apiClient.get<WeeklyAnalysis>("/api/analytics/weekly", {
-    cache: "no-store",
-  });
+  try {
+    return await apiClient.get<WeeklyAnalysis>("/api/analytics/weekly", {
+      cache: "no-store",
+    });
+  } catch (error) {
+    if (allowMockFallback) {
+      return weeklyAnalysisMock;
+    }
+
+    throw error;
+  }
 }

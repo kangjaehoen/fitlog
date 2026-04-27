@@ -37,6 +37,9 @@ info:
     java-version: ${java.version}
 
 app:
+  auth:
+    token-secret: ${AUTH_TOKEN_SECRET:fitlog-local-dev-secret}
+    token-validity-hours: ${AUTH_TOKEN_VALIDITY_HOURS:168}
   cors:
     allowed-origins:
       - ${web.origin:http://localhost:3000}

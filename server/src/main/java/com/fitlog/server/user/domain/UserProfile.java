@@ -41,4 +41,13 @@ public class UserProfile extends BaseTimeEntity {
 
 	@Column(name = "profile_image_url", length = 255)
 	private String profileImageUrl;
+
+	private UserProfile(Long userId, String nickname) {
+		this.userId = userId;
+		this.nickname = nickname;
+	}
+
+	public static UserProfile create(Long userId, String nickname) {
+		return new UserProfile(userId, nickname);
+	}
 }

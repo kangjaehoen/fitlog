@@ -31,6 +31,8 @@ The app reads these environment variables:
 - `DB_NAME` default: `fitlog`
 - `DB_USERNAME` default: `root`
 - `DB_PASSWORD` default: empty
+- `AUTH_TOKEN_SECRET` default: `fitlog-local-dev-secret`
+- `AUTH_TOKEN_VALIDITY_HOURS` default: `168`
 - `WEB_ORIGIN` default: `http://localhost:3000`
 - `SERVER_PORT` default: `8080`
 
@@ -74,6 +76,20 @@ Optional app user creation:
 
 - app health: `GET http://localhost:8080/api/health`
 - actuator health: `GET http://localhost:8080/actuator/health`
+- demo login: `POST http://localhost:8080/api/auth/login`
+
+Demo login request body:
+
+```json
+{
+  "socialType": "KAKAO",
+  "providerUserId": "fitlog-demo-kakao",
+  "email": "kakao.demo@fitlog.local",
+  "nickname": "Kakao User"
+}
+```
+
+After login, pass the returned token as `Authorization: Bearer <token>` to `GET /api/auth/me`.
 
 ## Test
 
