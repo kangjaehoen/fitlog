@@ -1,9 +1,8 @@
 export type RoutineEditorData = {
+  id?: number;
   name: string;
-  saveActionLabel: string;
-  insight: string;
   days: Array<{
-    key: string;
+    key: "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
     label: string;
     active: boolean;
   }>;

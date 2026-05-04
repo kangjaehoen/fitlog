@@ -48,4 +48,14 @@ public class MealLog extends BaseTimeEntity {
 
 	@Column(name = "memo", length = 500)
 	private String memo;
+
+	private MealLog(Long userId, MealType mealType, LocalDate loggedDate) {
+		this.userId = userId;
+		this.mealType = mealType;
+		this.loggedDate = loggedDate;
+	}
+
+	public static MealLog create(Long userId, MealType mealType, LocalDate loggedDate) {
+		return new MealLog(userId, mealType, loggedDate);
+	}
 }

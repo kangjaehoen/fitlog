@@ -21,6 +21,7 @@ export type ProfileScreenData = {
     deltaDirection: "up" | "down";
     color: string;
     series: number[];
+    dateLabels?: string[];
   }>;
   shortcuts: Array<{
     label: string;
@@ -32,6 +33,7 @@ export type ProfileScreenData = {
 export type SettingsData = {
   accountActions: Array<{
     label: string;
+    action?: "logout";
     href?: string;
     tone?: "default" | "danger";
   }>;

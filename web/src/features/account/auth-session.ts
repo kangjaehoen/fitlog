@@ -15,3 +15,54 @@ export function persistAuthSession(response: AuthResponse) {
   localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(response.user));
   document.cookie = `${AUTH_COOKIE_KEY}=${encodeURIComponent(response.token)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
 }
+
+export function clearAuthSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+  document.cookie = `${AUTH_COOKIE_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
+export function getPersistedAuthToken() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const storageToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  if (storageToken) {
+    return storageToken;
+  }
+
+  const cookiePrefix = `${AUTH_COOKIE_KEY}=`;
+  const authCookie = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(cookiePrefix));
+
+  return authCookie
+    ? decodeURIComponent(authCookie.slice(cookiePrefix.length))
+    : null;
+}
+
+export function updatePersistedNickname(nickname: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const rawUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+  if (!rawUser) {
+    return;
+  }
+
+  try {
+    const user = JSON.parse(rawUser) as { nickname?: string };
+    localStorage.setItem(
+      AUTH_USER_STORAGE_KEY,
+      JSON.stringify({ ...user, nickname }),
+    );
+  } catch {
+    localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+  }
+}

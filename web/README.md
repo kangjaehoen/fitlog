@@ -24,14 +24,12 @@ src/
 ## 개발 원칙
 
 - `app/**/page.tsx`가 라우트 엔트리입니다.
-- 화면별 데이터는 `features/*/api.ts`, `features/*/mock-data.ts`에서 관리합니다.
-- 실제 API 연결 전에는 mock 데이터를 사용합니다.
+- 화면별 서버 데이터는 `features/*/api.ts`에서 백엔드 API로 조회합니다.
+- 로그인 이후 화면은 인증 쿠키(`fitlog_auth_token`)를 사용해 서버와 통신합니다.
 - 레거시 HTML은 앱 런타임에서 사용하지 않고 `preview/legacy-html/`에 보관합니다.
 
 ## 환경 변수
 
-- `FITLOG_USE_REAL_API=true`
-  실제 백엔드 API를 사용합니다.
 - `API_BASE_URL`
   서버 API 기본 주소입니다. 기본값은 `http://localhost:8080`입니다.
 - `NEXT_PUBLIC_API_BASE_URL`

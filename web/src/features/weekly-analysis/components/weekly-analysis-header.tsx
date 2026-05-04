@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -7,12 +10,24 @@ import {
 type WeeklyAnalysisHeaderProps = {
   weekLabel: string;
   dateRange: string;
+  previousWeekHref: string;
+  nextWeekHref: string;
+  canViewNextWeek: boolean;
 };
 
 export function WeeklyAnalysisHeader({
   weekLabel,
   dateRange,
+  previousWeekHref,
+  nextWeekHref,
+  canViewNextWeek,
 }: WeeklyAnalysisHeaderProps) {
+  const router = useRouter();
+
+  function navigateTo(href: string) {
+    router.push(href);
+  }
+
   return (
     <header className="sticky top-0 z-30 border-b border-white/70 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-md flex-col gap-4 px-5 py-4">
@@ -35,6 +50,7 @@ export function WeeklyAnalysisHeader({
         <div className="flex items-center justify-between rounded-[24px] border border-slate-100 bg-slate-50 px-3 py-3">
           <button
             type="button"
+            onClick={() => navigateTo(previousWeekHref)}
             className="rounded-2xl bg-white p-2.5 text-slate-500 shadow-sm"
             aria-label="이전 주"
           >
@@ -46,13 +62,25 @@ export function WeeklyAnalysisHeader({
               {dateRange}
             </p>
           </div>
-          <button
-            type="button"
-            className="rounded-2xl bg-slate-100 p-2.5 text-slate-300"
-            aria-label="다음 주"
-          >
-            <ChevronRightIcon className="size-5" />
-          </button>
+          {canViewNextWeek ? (
+            <button
+              type="button"
+              onClick={() => navigateTo(nextWeekHref)}
+              className="rounded-2xl bg-white p-2.5 text-slate-500 shadow-sm"
+              aria-label="다음 주"
+            >
+              <ChevronRightIcon className="size-5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-2xl bg-slate-100 p-2.5 text-slate-300"
+              aria-label="다음 주"
+            >
+              <ChevronRightIcon className="size-5" />
+            </button>
+          )}
         </div>
       </div>
     </header>

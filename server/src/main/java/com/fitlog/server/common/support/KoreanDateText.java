@@ -2,13 +2,11 @@ package com.fitlog.server.common.support;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.Locale;
 
 public final class KoreanDateText {
 
 	private static final Locale LOCALE = Locale.KOREAN;
-	private static final WeekFields WEEK_FIELDS = WeekFields.of(DayOfWeek.MONDAY, 1);
 
 	private KoreanDateText() {
 	}
@@ -29,7 +27,7 @@ public final class KoreanDateText {
 			Locale.ROOT,
 			"%d\uC6D4 %d\uC8FC\uCC28",
 			date.getMonthValue(),
-			date.get(WEEK_FIELDS.weekOfMonth())
+			mondayOrdinalInMonth(date)
 		);
 	}
 
@@ -49,5 +47,18 @@ public final class KoreanDateText {
 			date.getDayOfMonth(),
 			formatWeekday(date)
 		);
+	}
+
+	private static int mondayOrdinalInMonth(LocalDate date) {
+		LocalDate firstMonday = date.withDayOfMonth(1);
+		while (firstMonday.getDayOfWeek() != DayOfWeek.MONDAY) {
+			firstMonday = firstMonday.plusDays(1);
+		}
+
+		if (date.isBefore(firstMonday)) {
+			return 1;
+		}
+
+		return ((date.getDayOfMonth() - firstMonday.getDayOfMonth()) / 7) + 1;
 	}
 }

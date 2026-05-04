@@ -39,4 +39,15 @@ public class WorkoutExercise extends BaseTimeEntity {
 
 	@Column(name = "sort_order", nullable = false)
 	private int sortOrder;
+
+	private WorkoutExercise(Long sessionId, Long routineExerciseId, String exerciseName, int sortOrder) {
+		this.sessionId = sessionId;
+		this.routineExerciseId = routineExerciseId;
+		this.exerciseName = exerciseName;
+		this.sortOrder = sortOrder;
+	}
+
+	public static WorkoutExercise create(Long sessionId, String exerciseName, int sortOrder) {
+		return new WorkoutExercise(sessionId, null, exerciseName, sortOrder);
+	}
 }

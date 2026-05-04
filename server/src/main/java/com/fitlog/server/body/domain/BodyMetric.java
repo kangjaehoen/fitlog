@@ -49,4 +49,34 @@ public class BodyMetric extends BaseTimeEntity {
 
 	@Column(name = "body_fat_percent", precision = 5, scale = 2)
 	private BigDecimal bodyFatPercent;
+
+	private BodyMetric(
+		Long userId,
+		LocalDate measuredOn,
+		BigDecimal weightKg,
+		BigDecimal skeletalMuscleKg,
+		BigDecimal bodyFatPercent
+	) {
+		this.userId = userId;
+		this.measuredOn = measuredOn;
+		this.weightKg = weightKg;
+		this.skeletalMuscleKg = skeletalMuscleKg;
+		this.bodyFatPercent = bodyFatPercent;
+	}
+
+	public static BodyMetric create(
+		Long userId,
+		LocalDate measuredOn,
+		BigDecimal weightKg,
+		BigDecimal skeletalMuscleKg,
+		BigDecimal bodyFatPercent
+	) {
+		return new BodyMetric(userId, measuredOn, weightKg, skeletalMuscleKg, bodyFatPercent);
+	}
+
+	public void update(BigDecimal weightKg, BigDecimal skeletalMuscleKg, BigDecimal bodyFatPercent) {
+		this.weightKg = weightKg;
+		this.skeletalMuscleKg = skeletalMuscleKg;
+		this.bodyFatPercent = bodyFatPercent;
+	}
 }

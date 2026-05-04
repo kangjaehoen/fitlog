@@ -3,17 +3,72 @@
 import { useState } from "react";
 import { GripVerticalIcon, TrashIcon } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
+import { getPersistedAuthToken } from "@/features/account/auth-session";
+import { saveRoutineEditor } from "../api";
 import type { RoutineEditorData } from "../types";
 
 type RoutineEditorScreenProps = {
   data: RoutineEditorData;
+  createNew?: boolean;
 };
 
-export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
+const SAVE_ACTION_LABEL = "저장하기";
+
+export function RoutineEditorScreen({
+  createNew = false,
+  data,
+}: RoutineEditorScreenProps) {
+  const [routineId, setRoutineId] = useState(data.id);
   const [name, setName] = useState(data.name);
   const [days, setDays] = useState(data.days);
   const [exercises, setExercises] = useState(data.exercises);
+  const [shouldCreateNew, setShouldCreateNew] = useState(createNew);
   const [savedLabel, setSavedLabel] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      setErrorMessage("루틴 이름을 입력해주세요.");
+      return;
+    }
+
+    if (exercises.length === 0) {
+      setErrorMessage("운동을 1개 이상 추가해주세요.");
+      return;
+    }
+
+    setSaving(true);
+    setErrorMessage(null);
+
+    try {
+      const savedRoutine = await saveRoutineEditor(
+        {
+          id: routineId,
+          name,
+          days,
+          exercises,
+        },
+        getPersistedAuthToken(),
+        shouldCreateNew,
+      );
+
+      setName(savedRoutine.name);
+      setRoutineId(savedRoutine.id);
+      setDays(savedRoutine.days);
+      setExercises(savedRoutine.exercises);
+      setShouldCreateNew(false);
+      setSavedLabel(`"${savedRoutine.name || "새 루틴"}" 루틴 구성이 저장되었어요.`);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해주세요."
+          : "루틴 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
@@ -88,13 +143,13 @@ export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
 
           {exercises.map((exercise, index) => (
             <article
-              key={`${exercise.name}-${index}`}
+              key={`exercise-${index}`}
               className="space-y-4 rounded-[28px] border border-slate-100 bg-white p-5 shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <GripVerticalIcon className="size-4 text-slate-300" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <input
                       value={exercise.name}
                       onChange={(event) =>
@@ -106,7 +161,7 @@ export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
                           ),
                         )
                       }
-                      className="text-base font-bold text-slate-800 outline-none"
+                      className="w-full bg-transparent text-base font-bold text-slate-800 outline-none"
                     />
                     <p className="text-[10px] font-bold uppercase text-indigo-500">
                       {exercise.group}
@@ -137,7 +192,7 @@ export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
                 <div className="mt-3 space-y-2">
                   {exercise.sets.map((set, setIndex) => (
                     <div
-                      key={`${exercise.name}-set-${setIndex}`}
+                      key={`exercise-${index}-set-${setIndex}`}
                       className="grid grid-cols-3 gap-4 items-center"
                     >
                       <span className="px-2 text-xs font-bold text-slate-600">
@@ -218,12 +273,6 @@ export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
           ))}
         </section>
 
-        <section className="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
-          <span className="text-lg text-amber-500">!</span>
-          <p className="text-[11px] leading-5 text-amber-700">
-            <span className="font-bold">AI 코칭 메모</span> {data.insight}
-          </p>
-        </section>
       </main>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-slate-100 bg-white/95 px-5 py-5 backdrop-blur-xl">
@@ -233,14 +282,18 @@ export function RoutineEditorScreen({ data }: RoutineEditorScreenProps) {
               {savedLabel}
             </p>
           ) : null}
+          {errorMessage ? (
+            <p className="mb-3 text-center text-xs font-semibold text-rose-500">
+              {errorMessage}
+            </p>
+          ) : null}
           <button
             type="button"
-            onClick={() =>
-              setSavedLabel(`"${name || "새 루틴"}" 루틴 구성이 저장되었어요.`)
-            }
+            onClick={() => void handleSave()}
+            disabled={saving}
             className="w-full rounded-2xl bg-indigo-600 py-4 text-base font-bold text-white shadow-lg shadow-indigo-100 transition-transform active:scale-[0.98]"
           >
-            {data.saveActionLabel}
+            {saving ? "저장 중" : SAVE_ACTION_LABEL}
           </button>
         </div>
       </div>

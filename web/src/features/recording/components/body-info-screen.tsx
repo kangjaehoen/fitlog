@@ -1,7 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { StackHeader } from "@/components/navigation/stack-header";
+import { getPersistedAuthToken } from "@/features/account/auth-session";
+import { recordBodyMetric } from "../api";
 import type { BodyInfoDraft, BodyMetricKey } from "../types";
 
 type BodyInfoScreenProps = {
@@ -13,6 +16,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export function BodyInfoScreen({ draft }: BodyInfoScreenProps) {
+  const router = useRouter();
   const [currentKey, setCurrentKey] = useState<BodyMetricKey>(
     draft.metrics[0]?.key ?? "weight",
   );
@@ -23,6 +27,8 @@ export function BodyInfoScreen({ draft }: BodyInfoScreenProps) {
     fat: draft.metrics.find((metric) => metric.key === "fat")?.value ?? 0,
   });
   const [savedLabel, setSavedLabel] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const metric = useMemo(
     () => draft.metrics.find((item) => item.key === currentKey) ?? draft.metrics[0],
@@ -40,6 +46,34 @@ export function BodyInfoScreen({ draft }: BodyInfoScreenProps) {
       ...previous,
       [currentKey]: clamp(nextValue, metric.min, metric.max),
     }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setErrorMessage(null);
+
+    try {
+      await recordBodyMetric(
+        {
+          weightKg: values.weight,
+          skeletalMuscleKg: values.muscle,
+          bodyFatPercent: values.fat,
+        },
+        getPersistedAuthToken(),
+      );
+      setSavedLabel(
+        `${metric.label} ${currentValue.toFixed(1)}${metric.unit} 기록을 저장했고 신체 지표 변화에 반영했어요.`,
+      );
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해주세요."
+          : "신체 기록 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -155,17 +189,19 @@ export function BodyInfoScreen({ draft }: BodyInfoScreenProps) {
               {savedLabel}
             </p>
           ) : null}
+          {errorMessage ? (
+            <p className="text-center text-xs font-semibold text-rose-500">
+              {errorMessage}
+            </p>
+          ) : null}
           <button
             type="button"
-            onClick={() =>
-              setSavedLabel(
-                `${metric.label} ${currentValue.toFixed(1)}${metric.unit} 기록을 저장했어요.`,
-              )
-            }
+            onClick={() => void handleSave()}
+            disabled={saving}
             className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-xl transition-transform active:scale-[0.98]"
             style={{ backgroundColor: metric.color }}
           >
-            {draft.primaryActionLabel}
+            {saving ? "저장 중" : draft.primaryActionLabel}
           </button>
         </div>
       </div>

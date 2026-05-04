@@ -56,4 +56,37 @@ public class MealItem extends BaseTimeEntity {
 
 	@Column(name = "fat_g", precision = 6, scale = 2)
 	private BigDecimal fatG;
+
+	private MealItem(
+		Long mealLogId,
+		String foodName,
+		BigDecimal quantity,
+		QuantityUnit quantityUnit,
+		Integer caloriesKcal,
+		BigDecimal carbG,
+		BigDecimal proteinG,
+		BigDecimal fatG
+	) {
+		this.mealLogId = mealLogId;
+		this.foodName = foodName;
+		this.quantity = quantity;
+		this.quantityUnit = quantityUnit;
+		this.caloriesKcal = caloriesKcal;
+		this.carbG = carbG;
+		this.proteinG = proteinG;
+		this.fatG = fatG;
+	}
+
+	public static MealItem create(
+		Long mealLogId,
+		String foodName,
+		BigDecimal quantity,
+		QuantityUnit quantityUnit,
+		Integer caloriesKcal,
+		BigDecimal carbG,
+		BigDecimal proteinG,
+		BigDecimal fatG
+	) {
+		return new MealItem(mealLogId, foodName, quantity, quantityUnit, caloriesKcal, carbG, proteinG, fatG);
+	}
 }

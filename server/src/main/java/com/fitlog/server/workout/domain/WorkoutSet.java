@@ -44,4 +44,22 @@ public class WorkoutSet extends BaseTimeEntity {
 
 	@Column(name = "completed", nullable = false)
 	private boolean completed = false;
+
+	private WorkoutSet(Long workoutExerciseId, int setOrder, BigDecimal weightKg, Integer repetitions, boolean completed) {
+		this.workoutExerciseId = workoutExerciseId;
+		this.setOrder = setOrder;
+		this.weightKg = weightKg;
+		this.repetitions = repetitions;
+		this.completed = completed;
+	}
+
+	public static WorkoutSet create(
+		Long workoutExerciseId,
+		int setOrder,
+		BigDecimal weightKg,
+		Integer repetitions,
+		boolean completed
+	) {
+		return new WorkoutSet(workoutExerciseId, setOrder, weightKg, repetitions, completed);
+	}
 }

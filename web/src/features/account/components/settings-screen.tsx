@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   BellIcon,
   ChevronRightIcon,
@@ -13,19 +15,40 @@ import {
 } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { clearAuthSession } from "../auth-session";
+import { logout } from "../api";
 import type { SettingsData } from "../types";
-import { useState } from "react";
 
 type SettingsScreenProps = {
   settings: SettingsData;
 };
 
 export function SettingsScreen({ settings }: SettingsScreenProps) {
+  const router = useRouter();
   const [notificationMap, setNotificationMap] = useState(
     Object.fromEntries(
       settings.notifications.map((item) => [item.key, item.enabled]),
     ),
   );
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+    } catch {
+      // Local session cleanup still lets the user return to the login screen.
+    } finally {
+      clearAuthSession();
+      router.replace("/splash-screen?login=1");
+      router.refresh();
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -60,7 +83,17 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                 );
               }
 
-              return <button key={action.label} type="button" className="w-full text-left">{content}</button>;
+              return (
+                <button
+                  key={action.label}
+                  type="button"
+                  className="w-full text-left disabled:cursor-wait disabled:opacity-70"
+                  disabled={isLoggingOut}
+                  onClick={action.action === "logout" ? handleLogout : undefined}
+                >
+                  {content}
+                </button>
+              );
             })}
           </div>
         </section>

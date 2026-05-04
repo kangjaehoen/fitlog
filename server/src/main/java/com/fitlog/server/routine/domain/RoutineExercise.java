@@ -39,4 +39,15 @@ public class RoutineExercise extends BaseTimeEntity {
 
 	@Column(name = "notes", length = 500)
 	private String notes;
+
+	private RoutineExercise(Long routineId, String exerciseName, int sortOrder, String notes) {
+		this.routineId = routineId;
+		this.exerciseName = exerciseName;
+		this.sortOrder = sortOrder;
+		this.notes = notes;
+	}
+
+	public static RoutineExercise create(Long routineId, String exerciseName, int sortOrder, String notes) {
+		return new RoutineExercise(routineId, exerciseName, sortOrder, notes);
+	}
 }

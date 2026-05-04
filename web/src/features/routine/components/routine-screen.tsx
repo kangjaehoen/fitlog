@@ -1,14 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import {
   BoltIcon,
   ChevronLeftIcon,
   DumbbellIcon,
-  MoreVerticalIcon,
   SearchIcon,
   SparklesIcon,
 } from "@/components/icons";
+import { getPersistedAuthToken } from "@/features/account/auth-session";
+import { deleteRoutine, reorderRoutines } from "../api";
 import type { RoutineOverview } from "../types";
 
 type RoutineScreenProps = {
@@ -38,6 +40,29 @@ const buttonStyles = {
 
 export function RoutineScreen({ overview }: RoutineScreenProps) {
   const router = useRouter();
+  const [routines, setRoutines] = useState(overview.routines);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [manageMode, setManageMode] = useState(false);
+  const [pendingAction, setPendingAction] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const normalizedSearchTerm = normalizeSearchText(searchTerm);
+  const filteredRoutines = useMemo(() => {
+    if (!normalizedSearchTerm) {
+      return routines;
+    }
+
+    return routines.filter((routine) =>
+      normalizeSearchText(
+        [
+          routine.title,
+          routine.description,
+          routine.exerciseSummary,
+          routine.frequencyLabel,
+        ].join(" "),
+      ).includes(normalizedSearchTerm),
+    );
+  }, [normalizedSearchTerm, routines]);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -46,6 +71,76 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
     }
 
     router.push("/");
+  };
+
+  const handleToggleManageMode = () => {
+    setManageMode((previous) => !previous);
+    setSearchTerm("");
+    setErrorMessage(null);
+  };
+
+  const handleMoveRoutine = async (routineId: number, direction: -1 | 1) => {
+    const currentIndex = routines.findIndex((routine) => routine.id === routineId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= routines.length) {
+      return;
+    }
+
+    const previousRoutines = routines;
+    const nextRoutines = [...routines];
+    [nextRoutines[currentIndex], nextRoutines[nextIndex]] = [
+      nextRoutines[nextIndex],
+      nextRoutines[currentIndex],
+    ];
+
+    setRoutines(nextRoutines);
+    setPendingAction(true);
+    setErrorMessage(null);
+
+    try {
+      await reorderRoutines(
+        nextRoutines.map((routine) => routine.id),
+        getPersistedAuthToken(),
+      );
+    } catch (error) {
+      setRoutines(previousRoutines);
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 수정해주세요."
+          : "루틴 순서 변경 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setPendingAction(false);
+    }
+  };
+
+  const handleDeleteRoutine = async (routine: RoutineOverview["routines"][number]) => {
+    if (!window.confirm(`"${routine.title}" 루틴을 삭제할까요?`)) {
+      return;
+    }
+
+    const previousRoutines = routines;
+    const nextRoutines = routines.filter((item) => item.id !== routine.id);
+
+    setRoutines(nextRoutines);
+    setPendingAction(true);
+    setErrorMessage(null);
+
+    try {
+      await deleteRoutine(routine.id, getPersistedAuthToken());
+      if (nextRoutines.length === 0) {
+        setManageMode(false);
+      }
+    } catch (error) {
+      setRoutines(previousRoutines);
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 삭제해주세요."
+          : "루틴 삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setPendingAction(false);
+    }
   };
 
   return (
@@ -71,7 +166,10 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
             placeholder={overview.searchPlaceholder}
+            aria-label="루틴 검색"
             className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
@@ -79,25 +177,45 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {overview.sectionTitle}
+              {searchTerm.trim()
+                ? `검색 결과 (${filteredRoutines.length})`
+                : `내 루틴 (${routines.length})`}
             </h2>
             <button
               type="button"
-              onClick={() => router.push("/routine-edit")}
+              onClick={handleToggleManageMode}
+              disabled={routines.length === 0}
               className="text-[11px] font-bold text-indigo-600 transition hover:text-indigo-800"
             >
-              {overview.editLabel}
+              {manageMode ? "완료" : overview.editLabel}
             </button>
           </div>
+          {manageMode ? (
+            <p className="px-1 text-[11px] font-medium text-slate-400">
+              루틴 순서를 바꾸거나 삭제할 수 있습니다.
+            </p>
+          ) : null}
+          {errorMessage ? (
+            <p className="rounded-2xl bg-rose-50 px-4 py-3 text-center text-xs font-bold text-rose-500">
+              {errorMessage}
+            </p>
+          ) : null}
 
-          {overview.routines.map((routine) => {
+          {filteredRoutines.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-8 text-center text-sm font-bold text-slate-400">
+              검색 결과가 없습니다.
+            </div>
+          ) : null}
+
+          {filteredRoutines.map((routine) => {
+            const routineIndex = routines.findIndex((item) => item.id === routine.id);
             const tone = toneStyles[routine.tone];
             const buttonClass = buttonStyles[routine.buttonVariant];
             const MetaIcon = routine.icon === "bolt" ? BoltIcon : DumbbellIcon;
 
             return (
               <article
-                key={routine.title}
+                key={routine.id}
                 className={`space-y-5 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition duration-200 active:scale-[0.98] ${
                   routine.subdued ? "opacity-60" : ""
                 }`}
@@ -120,10 +238,11 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
                   {!routine.disabled ? (
                     <button
                       type="button"
-                      aria-label={`${routine.title} 옵션`}
-                      className="p-1 text-slate-300 transition hover:text-slate-500"
+                      onClick={() => router.push(`/routine-edit?routineId=${routine.id}`)}
+                      aria-label={`${routine.title} 루틴 편집`}
+                      className="shrink-0 rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-bold text-indigo-600 transition hover:bg-indigo-100"
                     >
-                      <MoreVerticalIcon className="size-4" />
+                      루틴 편집
                     </button>
                   ) : null}
                 </div>
@@ -146,29 +265,59 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
                   </div>
                 ) : null}
 
-                <button
-                  type="button"
-                  disabled={routine.disabled}
-                  onClick={() =>
-                    !routine.disabled ? router.push("/today-workout-log") : undefined
-                  }
-                  className={`w-full rounded-2xl py-4 text-sm font-bold transition-transform ${
-                    routine.disabled ? "" : "active:scale-[0.98]"
-                  } ${buttonClass}`}
-                >
-                  {overview.startActionLabel}
-                </button>
+                {manageMode ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleMoveRoutine(routine.id, -1)}
+                      disabled={pendingAction || routineIndex <= 0}
+                      className="rounded-xl bg-slate-100 py-3 text-xs font-bold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      위로
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleMoveRoutine(routine.id, 1)}
+                      disabled={pendingAction || routineIndex === routines.length - 1}
+                      className="rounded-xl bg-slate-100 py-3 text-xs font-bold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      아래로
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeleteRoutine(routine)}
+                      disabled={pendingAction}
+                      className="rounded-xl bg-rose-50 py-3 text-xs font-bold text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={routine.disabled}
+                    onClick={() =>
+                      !routine.disabled ? router.push("/today-workout-log") : undefined
+                    }
+                    className={`w-full rounded-2xl py-4 text-sm font-bold transition-transform ${
+                      routine.disabled ? "" : "active:scale-[0.98]"
+                    } ${buttonClass}`}
+                  >
+                    {overview.startActionLabel}
+                  </button>
+                )}
               </article>
             );
           })}
         </section>
       </main>
 
+      {!manageMode ? (
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20">
         <div className="mx-auto max-w-md bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent px-4 pb-6 pt-10">
           <button
             type="button"
-            onClick={() => router.push("/routine-edit")}
+            onClick={() => router.push("/routine-edit?mode=create")}
             className="pointer-events-auto flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-600 py-4 text-sm font-bold text-white shadow-[0_8px_25px_rgba(79,70,229,0.3)] transition-transform active:scale-[0.97]"
           >
             <SparklesIcon className="size-4" />
@@ -176,6 +325,11 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
           </button>
         </div>
       </div>
+      ) : null}
     </div>
   );
+}
+
+function normalizeSearchText(value: string) {
+  return value.normalize("NFKC").toLocaleLowerCase("ko-KR").replace(/\s+/g, "");
 }

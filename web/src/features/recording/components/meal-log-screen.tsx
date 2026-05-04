@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { SearchIcon } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { getPersistedAuthToken } from "@/features/account/auth-session";
+import { recordMeal, type MealRecordPayload } from "../api";
 import type { MealLogData } from "../types";
 
 type MealLogScreenProps = {
@@ -11,14 +14,40 @@ type MealLogScreenProps = {
 };
 
 type UnitKey = MealLogData["unitOptions"][number]["key"];
+type MealRecordDraft = MealLogData["records"][number] & {
+  persistable: boolean;
+  payload?: MealRecordPayload;
+};
+type PersistableMealRecordDraft = MealRecordDraft & {
+  persistable: true;
+  payload: MealRecordPayload;
+};
+
+const MEAL_TYPE_BY_LABEL: Record<string, MealRecordPayload["mealType"]> = {
+  아침: "BREAKFAST",
+  점심: "LUNCH",
+  저녁: "DINNER",
+  간식: "SNACK",
+};
 
 export function MealLogScreen({ data }: MealLogScreenProps) {
+  const router = useRouter();
   const [mealType, setMealType] = useState(data.mealTypes[0]);
   const [cheating, setCheating] = useState(false);
   const [unit, setUnit] = useState<UnitKey>(data.unitOptions[0]?.key ?? "serving");
   const [quantity, setQuantity] = useState(data.defaultServingAmount);
   const [foodName, setFoodName] = useState(data.defaultFoodName);
-  const [records, setRecords] = useState(data.records);
+  const [records, setRecords] = useState<MealRecordDraft[]>(() =>
+    data.records.map((record) => ({
+      ...record,
+      persistable: false,
+    })),
+  );
+  const [lastAddedDraftKey, setLastAddedDraftKey] = useState<string | null>(
+    null,
+  );
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const totalCalories = useMemo(
     () => records.reduce((sum, record) => sum + record.calories, 0),
@@ -26,25 +55,92 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
   );
   const remainingCalories = Math.max(data.goalCalories - totalCalories, 0);
 
-  const handleAddRecord = () => {
-    const normalizedName = foodName.trim() || data.defaultFoodName;
+  const currentDraftKey = () =>
+    JSON.stringify({
+      cheating,
+      foodName: foodName.trim(),
+      mealType,
+      quantity,
+      unit,
+    });
+
+  const buildCurrentMealRecord = (): PersistableMealRecordDraft | null => {
+    const normalizedName = foodName.trim();
+    if (!normalizedName) {
+      return null;
+    }
+
     const estimatedCalories =
       unit === "serving"
         ? data.estimatedCaloriesPerServing * quantity
         : Math.round(quantity * 1.7);
+    const calories = Math.max(0, estimatedCalories);
+    const quantityUnit = unit === "serving" ? "SERVING" : "GRAM";
 
-    setRecords((previous) => [
-      ...previous,
-      {
-        mealType,
-        time: "지금",
-        title: normalizedName,
-        amount:
-          unit === "serving" ? `${quantity}회분` : `${Math.round(quantity)}g`,
-        calories: estimatedCalories,
-        cheating,
+    return {
+      mealType,
+      time: "지금",
+      title: normalizedName,
+      amount: unit === "serving" ? `${quantity}회분` : `${Math.round(quantity)}g`,
+      calories,
+      cheating,
+      persistable: true,
+      payload: {
+        mealType: MEAL_TYPE_BY_LABEL[mealType] ?? "SNACK",
+        foodName: normalizedName,
+        quantity,
+        quantityUnit,
+        caloriesKcal: calories,
       },
-    ]);
+    };
+  };
+
+  const handleAddRecord = () => {
+    const record = buildCurrentMealRecord();
+    if (!record) {
+      setErrorMessage("음식 이름을 입력해주세요.");
+      return;
+    }
+
+    setRecords((previous) => [...previous, record]);
+    setLastAddedDraftKey(currentDraftKey());
+    setErrorMessage(null);
+  };
+
+  const handleFinishMealLog = async () => {
+    const currentRecord = buildCurrentMealRecord();
+    const persistableRecords = records.filter(
+      (record): record is PersistableMealRecordDraft =>
+        record.persistable && Boolean(record.payload),
+    );
+    const recordsToPersist =
+      currentRecord && currentDraftKey() !== lastAddedDraftKey
+        ? [...persistableRecords, currentRecord]
+        : persistableRecords;
+
+    if (recordsToPersist.length === 0) {
+      setErrorMessage("저장할 식단 기록이 없습니다. 식단을 추가한 뒤 다시 시도해주세요.");
+      return;
+    }
+
+    setSaving(true);
+    setErrorMessage(null);
+
+    try {
+      const token = getPersistedAuthToken();
+      for (const record of recordsToPersist) {
+        await recordMeal(record.payload, token);
+      }
+
+      router.replace("/main");
+    } catch (error) {
+      setSaving(false);
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해주세요."
+          : "식단 기록 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    }
   };
 
   return (
@@ -157,10 +253,16 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
           <button
             type="button"
             onClick={handleAddRecord}
+            disabled={saving}
             className="w-full rounded-2xl bg-indigo-600 py-4 text-base font-bold text-white shadow-lg shadow-indigo-100 transition-transform active:scale-[0.98]"
           >
             {data.primaryActionLabel}
           </button>
+          {errorMessage ? (
+            <p className="text-center text-xs font-bold text-rose-500">
+              {errorMessage}
+            </p>
+          ) : null}
         </section>
 
         <section className="space-y-4">
@@ -230,9 +332,13 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
           </div>
           <button
             type="button"
-            className="w-full rounded-2xl bg-slate-800 py-4 text-base font-bold text-white transition-transform active:scale-[0.98]"
+            onClick={() => void handleFinishMealLog()}
+            disabled={saving}
+            className={`w-full rounded-2xl bg-slate-800 py-4 text-base font-bold text-white transition-transform active:scale-[0.98] ${
+              saving ? "cursor-not-allowed opacity-70" : ""
+            }`}
           >
-            {data.finishActionLabel}
+            {saving ? "식단 기록 저장 중" : data.finishActionLabel}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   BoltIcon,
@@ -10,10 +11,25 @@ import {
   SearchIcon,
 } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
+import { getPersistedAuthToken } from "@/features/account/auth-session";
+import { recordWorkout, type WorkoutRecordPayload } from "../api";
 import type { WorkoutLogData } from "../types";
 
 type WorkoutLogScreenProps = {
   data: WorkoutLogData;
+};
+
+type WorkoutSetDraft = WorkoutLogData["routineTemplate"][number];
+
+type CompletedWorkoutExercise = WorkoutLogData["completedExercises"][number] & {
+  persistable: boolean;
+  sets: WorkoutSetDraft[];
+};
+
+const INTENSITY_BY_LABEL: Record<string, WorkoutRecordPayload["intensity"]> = {
+  쉬움: "EASY",
+  적당함: "MODERATE",
+  "매우 힘듦": "HARD",
 };
 
 function formatClock(totalSeconds: number) {
@@ -27,12 +43,26 @@ function formatClock(totalSeconds: number) {
 }
 
 export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
+  const router = useRouter();
   const [seconds, setSeconds] = useState(data.initialDurationSeconds);
   const [running, setRunning] = useState(true);
   const [exerciseName, setExerciseName] = useState(data.exerciseName);
   const [intensity, setIntensity] = useState(data.intensityOptions[1] ?? "");
-  const [sets, setSets] = useState(data.routineTemplate);
-  const [completedExercises, setCompletedExercises] = useState(data.completedExercises);
+  const [sets, setSets] = useState<WorkoutSetDraft[]>(data.routineTemplate);
+  const [completedExercises, setCompletedExercises] = useState<
+    CompletedWorkoutExercise[]
+  >(() =>
+    data.completedExercises.map((exercise) => ({
+      ...exercise,
+      persistable: false,
+      sets: [],
+    })),
+  );
+  const [lastSavedDraftKey, setLastSavedDraftKey] = useState<string | null>(
+    null,
+  );
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!running) {
@@ -52,23 +82,105 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
     [completedExercises],
   );
 
-  const saveCurrentExercise = () => {
+  const currentDraftKey = () =>
+    JSON.stringify({
+      name: exerciseName.trim() || "새 운동",
+      sets: sets
+        .filter((set) => set.done)
+        .map((set) => ({
+          reps: set.reps,
+          weight: set.weight,
+        })),
+    });
+
+  const buildCurrentExercise = (): CompletedWorkoutExercise | null => {
     const finishedSets = sets.filter((set) => set.done);
+    if (finishedSets.length === 0) {
+      return null;
+    }
+
     const totalVolume = finishedSets.reduce(
       (sum, set) => sum + set.weight * set.reps,
       0,
     );
+    const savedSets = finishedSets.map((set) => ({
+      done: true,
+      reps: set.reps,
+      weight: set.weight,
+    }));
 
-    setCompletedExercises((previous) => [
-      ...previous,
-      {
-        title: exerciseName.trim() || "새 운동",
-        summary: `${finishedSets.length}세트 · 총 ${totalVolume.toLocaleString()}kg 볼륨`,
-        time: "지금",
-        calories: Math.max(90, finishedSets.length * 55),
-        icon: "strength",
-      },
-    ]);
+    return {
+      title: exerciseName.trim() || "새 운동",
+      summary: `${finishedSets.length}세트 · 총 ${totalVolume.toLocaleString()}kg 볼륨`,
+      time: "지금",
+      calories: Math.max(90, finishedSets.length * 55),
+      icon: "strength",
+      persistable: true,
+      sets: savedSets,
+    };
+  };
+
+  const saveCurrentExercise = () => {
+    const exercise = buildCurrentExercise();
+    if (!exercise) {
+      setErrorMessage("완료 체크된 세트가 있어야 운동을 추가할 수 있습니다.");
+      return;
+    }
+
+    setCompletedExercises((previous) => [...previous, exercise]);
+    setLastSavedDraftKey(currentDraftKey());
+    setErrorMessage(null);
+  };
+
+  const handleFinishWorkout = async () => {
+    const currentExercise = buildCurrentExercise();
+    const persistedExercises = completedExercises.filter(
+      (exercise) => exercise.persistable,
+    );
+    const exercises =
+      currentExercise && currentDraftKey() !== lastSavedDraftKey
+        ? [...persistedExercises, currentExercise]
+        : persistedExercises;
+
+    if (exercises.length === 0) {
+      setErrorMessage("저장할 완료 세트가 없습니다. 세트 완료 체크 후 다시 시도해주세요.");
+      return;
+    }
+
+    setSaving(true);
+    setRunning(false);
+    setErrorMessage(null);
+
+    try {
+      await recordWorkout(
+        {
+          durationMinutes: Math.max(0, Math.round(seconds / 60)),
+          caloriesBurned: exercises.reduce(
+            (sum, exercise) => sum + exercise.calories,
+            0,
+          ),
+          intensity: INTENSITY_BY_LABEL[intensity] ?? "MODERATE",
+          exercises: exercises.map((exercise) => ({
+            name: exercise.title,
+            sets: exercise.sets.map((set) => ({
+              weightKg: set.weight,
+              repetitions: set.reps,
+              completed: Boolean(set.done),
+            })),
+          })),
+        },
+        getPersistedAuthToken(),
+      );
+
+      router.replace("/main");
+    } catch (error) {
+      setSaving(false);
+      setErrorMessage(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해주세요."
+          : "운동 기록 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    }
   };
 
   return (
@@ -246,6 +358,11 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
           >
             {data.addActionLabel}
           </button>
+          {errorMessage ? (
+            <p className="text-center text-xs font-bold text-rose-500">
+              {errorMessage}
+            </p>
+          ) : null}
         </section>
 
         <section className="space-y-4">
@@ -257,13 +374,13 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
           </div>
 
           <div className="space-y-3">
-            {completedExercises.map((exercise) => {
+            {completedExercises.map((exercise, index) => {
               const Icon =
                 exercise.icon === "cardio" ? BoltIcon : DumbbellIcon;
 
               return (
                 <article
-                  key={`${exercise.title}-${exercise.time}`}
+                  key={`${exercise.title}-${exercise.time}-${index}`}
                   className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
                 >
                   <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -306,9 +423,13 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
           </div>
           <button
             type="button"
-            className="w-full rounded-2xl bg-slate-800 py-4 text-base font-bold text-white transition-transform active:scale-[0.98]"
+            onClick={() => void handleFinishWorkout()}
+            disabled={saving}
+            className={`w-full rounded-2xl bg-slate-800 py-4 text-base font-bold text-white transition-transform active:scale-[0.98] ${
+              saving ? "cursor-not-allowed opacity-70" : ""
+            }`}
           >
-            {data.finishActionLabel}
+            {saving ? "운동 기록 저장 중" : data.finishActionLabel}
           </button>
         </div>
       </div>

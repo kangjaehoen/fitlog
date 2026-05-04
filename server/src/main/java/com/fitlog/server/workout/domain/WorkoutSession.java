@@ -65,4 +65,49 @@ public class WorkoutSession extends BaseTimeEntity {
 
 	@Column(name = "memo", length = 500)
 	private String memo;
+
+	private WorkoutSession(
+		Long userId,
+		Long routineId,
+		LocalDate sessionDate,
+		LocalDateTime startedAt,
+		LocalDateTime completedAt,
+		Integer durationMinutes,
+		Integer caloriesBurned,
+		WorkoutIntensity intensity,
+		WorkoutStatus status
+	) {
+		this.userId = userId;
+		this.routineId = routineId;
+		this.sessionDate = sessionDate;
+		this.startedAt = startedAt;
+		this.completedAt = completedAt;
+		this.durationMinutes = durationMinutes;
+		this.caloriesBurned = caloriesBurned;
+		this.intensity = intensity;
+		this.status = status;
+	}
+
+	public static WorkoutSession createCompleted(
+		Long userId,
+		LocalDate sessionDate,
+		Integer durationMinutes,
+		Integer caloriesBurned,
+		WorkoutIntensity intensity
+	) {
+		LocalDateTime completedAt = LocalDateTime.now();
+		LocalDateTime startedAt = durationMinutes == null ? null : completedAt.minusMinutes(durationMinutes);
+
+		return new WorkoutSession(
+			userId,
+			null,
+			sessionDate,
+			startedAt,
+			completedAt,
+			durationMinutes,
+			caloriesBurned,
+			intensity,
+			WorkoutStatus.COMPLETED
+		);
+	}
 }

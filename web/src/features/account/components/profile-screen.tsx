@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import {
   CameraIcon,
@@ -10,6 +12,8 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { getPersistedAuthToken, updatePersistedNickname } from "../auth-session";
+import { updateProfileNickname } from "../api";
 import type { ProfileScreenData } from "../types";
 
 type ProfileScreenProps = {
@@ -31,9 +35,12 @@ function buildPath(points: number[]) {
 }
 
 export function ProfileScreen({ profile }: ProfileScreenProps) {
+  const router = useRouter();
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [draftName, setDraftName] = useState(profile.displayName);
   const [editing, setEditing] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const [currentMetricKey, setCurrentMetricKey] = useState(profile.metrics[0]?.key);
 
   const currentMetric = useMemo(
@@ -46,6 +53,41 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
   if (!currentMetric) {
     return null;
   }
+
+  const dateLabels =
+    currentMetric.dateLabels?.length ? currentMetric.dateLabels : ["오늘"];
+
+  const handleNicknameSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nickname = draftName.trim();
+    if (!nickname) {
+      setEditError("닉네임을 입력해주세요.");
+      return;
+    }
+
+    setSavingName(true);
+    setEditError(null);
+
+    try {
+      const updatedProfile = await updateProfileNickname(
+        nickname,
+        getPersistedAuthToken(),
+      );
+      setDisplayName(updatedProfile.displayName);
+      setDraftName(updatedProfile.displayName);
+      updatePersistedNickname(updatedProfile.displayName);
+      setEditing(false);
+      router.refresh();
+    } catch (error) {
+      setEditError(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해주세요."
+          : "닉네임 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      );
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
@@ -84,6 +126,7 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
                   type="button"
                   onClick={() => {
                     setDraftName(displayName);
+                    setEditError(null);
                     setEditing(true);
                   }}
                   className="inline-flex size-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
@@ -200,12 +243,24 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
                 </svg>
               </div>
 
-              <div className="mt-4 grid grid-cols-5 text-center text-[9px] font-bold text-slate-300">
-                <span>03.20</span>
-                <span>03.25</span>
-                <span>04.01</span>
-                <span>04.05</span>
-                <span style={{ color: currentMetric.color }}>오늘</span>
+              <div
+                className="mt-4 grid text-center text-[9px] font-bold text-slate-300"
+                style={{
+                  gridTemplateColumns: `repeat(${dateLabels.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {dateLabels.map((label, index) => (
+                  <span
+                    key={`${currentMetric.key}-${label}-${index}`}
+                    style={
+                      index === dateLabels.length - 1
+                        ? { color: currentMetric.color }
+                        : undefined
+                    }
+                  >
+                    {label}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -303,7 +358,10 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
               <h2 className="text-lg font-black text-slate-800">프로필 수정</h2>
               <button
                 type="button"
-                onClick={() => setEditing(false)}
+                onClick={() => {
+                  setEditError(null);
+                  setEditing(false);
+                }}
                 className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-500"
               >
                 닫기
@@ -311,15 +369,7 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
             </div>
             <form
               className="space-y-5 p-6"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (!draftName.trim()) {
-                  return;
-                }
-
-                setDisplayName(draftName.trim());
-                setEditing(false);
-              }}
+              onSubmit={(event) => void handleNicknameSubmit(event)}
             >
               <div>
                 <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -327,23 +377,37 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
                 </label>
                 <input
                   value={draftName}
-                  onChange={(event) => setDraftName(event.target.value)}
+                  onChange={(event) => {
+                    setDraftName(event.target.value);
+                    setEditError(null);
+                  }}
+                  maxLength={40}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 font-bold text-slate-800 outline-none focus:border-indigo-500"
                 />
               </div>
+              {editError ? (
+                <p className="text-xs font-semibold text-rose-500">
+                  {editError}
+                </p>
+              ) : null}
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setEditing(false)}
+                  onClick={() => {
+                    setEditError(null);
+                    setEditing(false);
+                  }}
+                  disabled={savingName}
                   className="flex-1 rounded-2xl border border-slate-200 py-3.5 text-sm font-bold text-slate-600"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
+                  disabled={savingName}
                   className="flex-1 rounded-2xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200"
                 >
-                  저장
+                  {savingName ? "저장 중" : "저장"}
                 </button>
               </div>
             </form>

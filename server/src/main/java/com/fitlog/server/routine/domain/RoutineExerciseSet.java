@@ -41,4 +41,25 @@ public class RoutineExerciseSet extends BaseTimeEntity {
 
 	@Column(name = "target_repetitions")
 	private Integer targetRepetitions;
+
+	private RoutineExerciseSet(
+		Long routineExerciseId,
+		int setOrder,
+		BigDecimal targetWeightKg,
+		Integer targetRepetitions
+	) {
+		this.routineExerciseId = routineExerciseId;
+		this.setOrder = setOrder;
+		this.targetWeightKg = targetWeightKg;
+		this.targetRepetitions = targetRepetitions;
+	}
+
+	public static RoutineExerciseSet create(
+		Long routineExerciseId,
+		int setOrder,
+		BigDecimal targetWeightKg,
+		Integer targetRepetitions
+	) {
+		return new RoutineExerciseSet(routineExerciseId, setOrder, targetWeightKg, targetRepetitions);
+	}
 }

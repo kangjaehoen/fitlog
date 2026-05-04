@@ -42,4 +42,11 @@ export const apiClient = {
       method: "POST",
     });
   },
+  patch<T>(path: string, body?: unknown, options?: MutationOptions) {
+    return request<T>(path, {
+      ...options,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      method: "PATCH",
+    });
+  },
 };

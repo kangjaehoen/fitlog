@@ -39,4 +39,32 @@ public class Routine extends BaseTimeEntity {
 
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
+
+	@Column(name = "display_order")
+	private Integer displayOrder;
+
+	private Routine(Long userId, String name, String description, Integer displayOrder) {
+		this.userId = userId;
+		this.name = name;
+		this.description = description;
+		this.active = true;
+		this.displayOrder = displayOrder;
+	}
+
+	public static Routine create(Long userId, String name, String description, Integer displayOrder) {
+		return new Routine(userId, name, description, displayOrder);
+	}
+
+	public void update(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
+
+	public void updateDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
+	}
+
+	public void deactivate() {
+		this.active = false;
+	}
 }

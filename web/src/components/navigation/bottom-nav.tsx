@@ -14,7 +14,7 @@ const items: Array<{
   key: NavKey;
   icon: typeof HomeIcon;
 }> = [
-  { href: "/", label: "홈", key: "home", icon: HomeIcon },
+  { href: "/main", label: "홈", key: "home", icon: HomeIcon },
   {
     href: "/fitness-routine",
     label: "루틴",

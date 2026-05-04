@@ -10,6 +10,7 @@ import { FitLogMark, ProviderLogo } from "./brand-icons";
 type SplashScreenProps = {
   data: SplashData;
   loginData: SocialLoginData;
+  initialShowLogin?: boolean;
 };
 
 const providerStyles = {
@@ -18,21 +19,29 @@ const providerStyles = {
   apple: "bg-black text-white",
 } as const;
 
-export function SplashScreen({ data, loginData }: SplashScreenProps) {
+export function SplashScreen({
+  data,
+  loginData,
+  initialShowLogin = false,
+}: SplashScreenProps) {
   const router = useRouter();
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(initialShowLogin);
   const [loadingProvider, setLoadingProvider] = useState<
     SocialLoginData["options"][number]["providerType"] | null
   >(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (showLogin) {
+      return;
+    }
+
     const timeout = window.setTimeout(() => {
       setShowLogin(true);
     }, 2200);
 
     return () => window.clearTimeout(timeout);
-  }, []);
+  }, [showLogin]);
 
   const handleLogin = async (
     providerType: SocialLoginData["options"][number]["providerType"],

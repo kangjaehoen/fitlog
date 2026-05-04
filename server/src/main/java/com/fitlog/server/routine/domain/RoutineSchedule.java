@@ -42,4 +42,13 @@ public class RoutineSchedule extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "day_of_week", nullable = false, length = 16)
 	private DayOfWeek dayOfWeek;
+
+	private RoutineSchedule(Long routineId, DayOfWeek dayOfWeek) {
+		this.routineId = routineId;
+		this.dayOfWeek = dayOfWeek;
+	}
+
+	public static RoutineSchedule create(Long routineId, DayOfWeek dayOfWeek) {
+		return new RoutineSchedule(routineId, dayOfWeek);
+	}
 }

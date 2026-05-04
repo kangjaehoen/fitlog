@@ -50,4 +50,8 @@ public class UserProfile extends BaseTimeEntity {
 	public static UserProfile create(Long userId, String nickname) {
 		return new UserProfile(userId, nickname);
 	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }

@@ -1,6 +1,8 @@
 export type WeeklyAnalysis = {
   weekLabel: string;
   dateRange: string;
+  weekStart?: string;
+  currentWeekStart?: string;
   totalWorkout: string;
   comparison: string;
   workoutBars: Array<{
