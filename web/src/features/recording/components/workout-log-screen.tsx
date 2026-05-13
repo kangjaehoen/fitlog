@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BoltIcon,
   CheckCircleIcon,
@@ -14,15 +14,20 @@ import { StackHeader } from "@/components/navigation/stack-header";
 import { getPersistedAuthToken } from "@/features/account/auth-session";
 import { recordWorkout, type WorkoutRecordPayload } from "../api";
 import type { WorkoutLogData } from "../types";
+import {
+  clearWorkoutDraftState,
+  loadWorkoutDraftState,
+  saveWorkoutDraftState,
+  type CompletedWorkoutExercise,
+  type WorkoutSetDraft,
+} from "../workout-draft-storage";
 
 type WorkoutLogScreenProps = {
   data: WorkoutLogData;
 };
 
-type WorkoutSetDraft = WorkoutLogData["routineTemplate"][number];
-
-type CompletedWorkoutExercise = WorkoutLogData["completedExercises"][number] & {
-  persistable: boolean;
+type RoutineExerciseTemplate = {
+  name: string;
   sets: WorkoutSetDraft[];
 };
 
@@ -31,6 +36,30 @@ const INTENSITY_BY_LABEL: Record<string, WorkoutRecordPayload["intensity"]> = {
   적당함: "MODERATE",
   "매우 힘듦": "HARD",
 };
+
+function cloneSets(sets: WorkoutSetDraft[]) {
+  return sets.map((set) => ({ ...set }));
+}
+
+function workoutRoutineExercises(data: WorkoutLogData): RoutineExerciseTemplate[] {
+  if (data.routineExercises?.length) {
+    return data.routineExercises.map((exercise) => ({
+      name: exercise.name,
+      sets: cloneSets(exercise.sets),
+    }));
+  }
+
+  if (data.exerciseName || data.routineTemplate.length > 0) {
+    return [
+      {
+        name: data.exerciseName || "새 운동",
+        sets: cloneSets(data.routineTemplate),
+      },
+    ];
+  }
+
+  return [];
+}
 
 function formatClock(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
@@ -44,11 +73,19 @@ function formatClock(totalSeconds: number) {
 
 export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
   const router = useRouter();
+  const routineExercises = useMemo(() => workoutRoutineExercises(data), [data]);
+  const initialRoutineExercise = routineExercises[0];
   const [seconds, setSeconds] = useState(data.initialDurationSeconds);
   const [running, setRunning] = useState(true);
-  const [exerciseName, setExerciseName] = useState(data.exerciseName);
+  const [exerciseName, setExerciseName] = useState(
+    initialRoutineExercise?.name ?? data.exerciseName,
+  );
   const [intensity, setIntensity] = useState(data.intensityOptions[1] ?? "");
-  const [sets, setSets] = useState<WorkoutSetDraft[]>(data.routineTemplate);
+  const [sets, setSets] = useState<WorkoutSetDraft[]>(
+    cloneSets(initialRoutineExercise?.sets ?? data.routineTemplate),
+  );
+  const [selectedRoutineExerciseIndex, setSelectedRoutineExerciseIndex] =
+    useState(0);
   const [completedExercises, setCompletedExercises] = useState<
     CompletedWorkoutExercise[]
   >(() =>
@@ -63,6 +100,93 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
   );
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const draftRestoredRef = useRef(false);
+
+  useEffect(() => {
+    const restoreTimer = window.setTimeout(() => {
+      if (data.routineId) {
+        const firstRoutineExercise = routineExercises[0];
+        clearWorkoutDraftState();
+        setSeconds(data.initialDurationSeconds);
+        setRunning(true);
+        setExerciseName(firstRoutineExercise?.name ?? data.exerciseName);
+        setIntensity(data.intensityOptions[1] ?? "");
+        setSets(cloneSets(firstRoutineExercise?.sets ?? data.routineTemplate));
+        setSelectedRoutineExerciseIndex(0);
+        setCompletedExercises(
+          data.completedExercises.map((exercise) => ({
+            ...exercise,
+            persistable: false,
+            sets: [],
+          })),
+        );
+        setLastSavedDraftKey(null);
+        setErrorMessage(null);
+        draftRestoredRef.current = true;
+        return;
+      }
+
+      const draft = loadWorkoutDraftState();
+      draftRestoredRef.current = true;
+      if (!draft) {
+        return;
+      }
+
+      const elapsedSeconds = draft.running
+        ? Math.max(0, Math.floor((Date.now() - draft.savedAt) / 1000))
+        : 0;
+
+      setSeconds(Math.max(0, draft.seconds + elapsedSeconds));
+      setRunning(draft.running);
+      setExerciseName(draft.exerciseName);
+      setIntensity(
+        data.intensityOptions.includes(draft.intensity)
+          ? draft.intensity
+          : data.intensityOptions[1] ?? "",
+      );
+      setSets(
+        draft.sets.length > 0 ? draft.sets : cloneSets(data.routineTemplate),
+      );
+      setCompletedExercises(draft.completedExercises);
+      setLastSavedDraftKey(draft.lastSavedDraftKey);
+    }, 0);
+
+    return () => window.clearTimeout(restoreTimer);
+  }, [
+    data.completedExercises,
+    data.exerciseName,
+    data.initialDurationSeconds,
+    data.intensityOptions,
+    data.routineId,
+    data.routineTemplate,
+    routineExercises,
+  ]);
+
+  useEffect(() => {
+    if (!draftRestoredRef.current) {
+      return;
+    }
+
+    saveWorkoutDraftState({
+      version: 1,
+      savedAt: Date.now(),
+      seconds,
+      running,
+      exerciseName,
+      intensity,
+      sets,
+      completedExercises,
+      lastSavedDraftKey,
+    });
+  }, [
+    completedExercises,
+    exerciseName,
+    intensity,
+    lastSavedDraftKey,
+    running,
+    seconds,
+    sets,
+  ]);
 
   useEffect(() => {
     if (!running) {
@@ -132,6 +256,17 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
     setErrorMessage(null);
   };
 
+  const selectRoutineExercise = (
+    exercise: RoutineExerciseTemplate,
+    index: number,
+  ) => {
+    setSelectedRoutineExerciseIndex(index);
+    setExerciseName(exercise.name);
+    setSets(cloneSets(exercise.sets));
+    setLastSavedDraftKey(null);
+    setErrorMessage(null);
+  };
+
   const handleFinishWorkout = async () => {
     const currentExercise = buildCurrentExercise();
     const persistedExercises = completedExercises.filter(
@@ -172,6 +307,7 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
         getPersistedAuthToken(),
       );
 
+      clearWorkoutDraftState();
       router.replace("/main");
     } catch (error) {
       setSaving(false);
@@ -228,7 +364,7 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
             </h2>
             <button
               type="button"
-              onClick={() => setSets(data.routineTemplate)}
+              onClick={() => router.push("/fitness-routine")}
               className="rounded-full bg-indigo-50 px-3 py-1.5 text-[11px] font-bold text-indigo-600"
             >
               {data.routineActionLabel}
@@ -245,6 +381,39 @@ export function WorkoutLogScreen({ data }: WorkoutLogScreenProps) {
               className="w-full rounded-xl border border-slate-100 bg-slate-50 py-3.5 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
+
+          {data.routineId && routineExercises.length > 0 ? (
+            <div className="space-y-2 rounded-2xl bg-indigo-50/60 p-3">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-bold text-indigo-700">
+                  불러온 루틴
+                </span>
+                <span className="text-[10px] font-bold text-indigo-400">
+                  {routineExercises.length}개 운동
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {routineExercises.map((exercise, index) => {
+                  const active = index === selectedRoutineExerciseIndex;
+
+                  return (
+                    <button
+                      key={`${exercise.name}-${index}`}
+                      type="button"
+                      onClick={() => selectRoutineExercise(exercise, index)}
+                      className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-bold transition ${
+                        active
+                          ? "border-indigo-600 bg-indigo-600 text-white"
+                          : "border-white bg-white text-slate-600"
+                      }`}
+                    >
+                      {exercise.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
 
           <div className="space-y-3 rounded-2xl bg-slate-50 p-4">
             <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold uppercase text-slate-400">

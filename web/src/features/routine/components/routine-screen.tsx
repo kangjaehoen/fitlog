@@ -79,6 +79,10 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
     setErrorMessage(null);
   };
 
+  const handleStartRoutine = (routineId: number) => {
+    router.push(`/today-workout-log?routineId=${routineId}`);
+  };
+
   const handleMoveRoutine = async (routineId: number, direction: -1 | 1) => {
     const currentIndex = routines.findIndex((routine) => routine.id === routineId);
     const nextIndex = currentIndex + direction;
@@ -297,7 +301,7 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
                     type="button"
                     disabled={routine.disabled}
                     onClick={() =>
-                      !routine.disabled ? router.push("/today-workout-log") : undefined
+                      !routine.disabled ? handleStartRoutine(routine.id) : undefined
                     }
                     className={`w-full rounded-2xl py-4 text-sm font-bold transition-transform ${
                       routine.disabled ? "" : "active:scale-[0.98]"

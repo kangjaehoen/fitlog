@@ -239,6 +239,53 @@ class AppContentControllerTest {
 	}
 
 	@Test
+	void workoutLogEndpointLoadsSelectedRoutineExercises() throws Exception {
+		String token = loginToken("workout-log-routine");
+		MvcResult result = this.mockMvc.perform(post("/api/routines")
+				.header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "name": "Push Day",
+					  "activeDays": ["MONDAY"],
+					  "exercises": [
+					    {
+					      "name": "Bench Press",
+					      "group": "Chest",
+					      "sets": [
+					        { "weight": 60.0, "reps": 10 },
+					        { "weight": 62.5, "reps": 8 }
+					      ]
+					    },
+					    {
+					      "name": "Shoulder Press",
+					      "group": "Shoulder",
+					      "sets": [
+					        { "weight": 30.0, "reps": 12 }
+					      ]
+					    }
+					  ]
+					}
+					"""))
+			.andExpect(status().isOk())
+			.andReturn();
+		Long routineId = this.objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
+
+		this.mockMvc.perform(get("/api/records/workouts/today")
+				.queryParam("routineId", routineId.toString())
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.routineId").value(routineId))
+			.andExpect(jsonPath("$.exerciseName").value("Bench Press"))
+			.andExpect(jsonPath("$.routineTemplate.length()").value(2))
+			.andExpect(jsonPath("$.routineExercises.length()").value(2))
+			.andExpect(jsonPath("$.routineExercises[0].name").value("Bench Press"))
+			.andExpect(jsonPath("$.routineExercises[0].sets.length()").value(2))
+			.andExpect(jsonPath("$.routineExercises[1].name").value("Shoulder Press"))
+			.andExpect(jsonPath("$.routineExercises[1].sets[0].reps").value(12));
+	}
+
+	@Test
 	void weeklyAnalysisEndpointReturnsRecordedWeeklyMetrics() throws Exception {
 		String token = loginToken("weekly-analysis");
 

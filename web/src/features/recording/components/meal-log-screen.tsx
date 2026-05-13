@@ -1,12 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SearchIcon } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { getPersistedAuthToken } from "@/features/account/auth-session";
 import { recordMeal, type MealRecordPayload } from "../api";
+import {
+  searchFoodNutrientRefs,
+  type FoodNutrientRefSearchItem,
+} from "../food-nutrient-refs-api";
 import type { MealLogData } from "../types";
 
 type MealLogScreenProps = {
@@ -35,8 +39,18 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
   const [mealType, setMealType] = useState(data.mealTypes[0]);
   const [cheating, setCheating] = useState(false);
   const [unit, setUnit] = useState<UnitKey>(data.unitOptions[0]?.key ?? "serving");
-  const [quantity, setQuantity] = useState(data.defaultServingAmount);
+  const [servingQuantity, setServingQuantity] = useState(data.defaultServingAmount);
+  const [gramInput, setGramInput] = useState(() =>
+    String(Math.max(1, Math.round(data.defaultServingAmount))),
+  );
   const [foodName, setFoodName] = useState(data.defaultFoodName);
+  const [selectedRef, setSelectedRef] = useState<FoodNutrientRefSearchItem | null>(
+    null,
+  );
+  const [suggestions, setSuggestions] = useState<FoodNutrientRefSearchItem[]>([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const latestSearchId = useRef(0);
   const [records, setRecords] = useState<MealRecordDraft[]>(() =>
     data.records.map((record) => ({
       ...record,
@@ -55,6 +69,48 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
   );
   const remainingCalories = Math.max(data.goalCalories - totalCalories, 0);
 
+  const quantity = useMemo(() => {
+    if (unit === "gram") {
+      const parsed = Number.parseFloat(gramInput);
+      if (!Number.isFinite(parsed)) {
+        return 0.01;
+      }
+      return Math.max(parsed, 0.01);
+    }
+    return servingQuantity;
+  }, [gramInput, servingQuantity, unit]);
+
+  const estimatedDraftCalories = useMemo(() => {
+    const nameOk = foodName.trim().length > 0;
+    if (!nameOk) {
+      return 0;
+    }
+
+    if (!selectedRef || !selectedRef.energyKcal || !selectedRef.nutrientBaselineG) {
+      const fallback =
+        unit === "serving"
+          ? data.estimatedCaloriesPerServing * quantity
+          : Math.round(quantity * 1.7);
+      return Math.max(0, fallback);
+    }
+
+    const baselineG = Number(selectedRef.nutrientBaselineG);
+    if (!Number.isFinite(baselineG) || baselineG <= 0) {
+      return 0;
+    }
+
+    const kcalPerG = Number(selectedRef.energyKcal) / baselineG;
+    const grams = unit === "gram" ? quantity : quantity * baselineG;
+    const calories = Math.round(kcalPerG * grams);
+    return Math.max(0, calories);
+  }, [
+    data.estimatedCaloriesPerServing,
+    foodName,
+    quantity,
+    selectedRef,
+    unit,
+  ]);
+
   const currentDraftKey = () =>
     JSON.stringify({
       cheating,
@@ -70,30 +126,84 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
       return null;
     }
 
-    const estimatedCalories =
-      unit === "serving"
-        ? data.estimatedCaloriesPerServing * quantity
-        : Math.round(quantity * 1.7);
-    const calories = Math.max(0, estimatedCalories);
+    const calories = estimatedDraftCalories;
     const quantityUnit = unit === "serving" ? "SERVING" : "GRAM";
+    const normalizedFoodCd = selectedRef ? selectedRef.foodCd : null;
 
     return {
       mealType,
       time: "지금",
       title: normalizedName,
-      amount: unit === "serving" ? `${quantity}회분` : `${Math.round(quantity)}g`,
+      amount: unit === "serving" ? `${quantity}인분` : `${Math.round(quantity)}g`,
       calories,
       cheating,
       persistable: true,
       payload: {
         mealType: MEAL_TYPE_BY_LABEL[mealType] ?? "SNACK",
         foodName: normalizedName,
+        foodCd: normalizedFoodCd,
         quantity,
         quantityUnit,
         caloriesKcal: calories,
       },
     };
   };
+
+  useEffect(() => {
+    const query = foodName.trim();
+    if (!query) {
+      queueMicrotask(() => {
+        setSuggestions([]);
+        setSuggestionsOpen(false);
+        setSearching(false);
+        setSelectedRef(null);
+      });
+      return;
+    }
+
+    if (selectedRef && selectedRef.foodNameKr === query) {
+      queueMicrotask(() => {
+        setSuggestions([]);
+        setSuggestionsOpen(false);
+        setSearching(false);
+      });
+      return;
+    }
+
+    if (selectedRef && selectedRef.foodNameKr !== query) {
+      queueMicrotask(() => setSelectedRef(null));
+    }
+
+    const searchId = ++latestSearchId.current;
+    queueMicrotask(() => setSearching(true));
+
+    const handle = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const results = await searchFoodNutrientRefs(query, 8);
+          if (latestSearchId.current !== searchId) {
+            return;
+          }
+          setSuggestions(results);
+          setSuggestionsOpen(true);
+        } catch {
+          if (latestSearchId.current !== searchId) {
+            return;
+          }
+          setSuggestions([]);
+          setSuggestionsOpen(false);
+        } finally {
+          if (latestSearchId.current === searchId) {
+            setSearching(false);
+          }
+        }
+      })();
+    }, 250);
+
+    return () => {
+      window.clearTimeout(handle);
+    };
+  }, [foodName, selectedRef]);
 
   const handleAddRecord = () => {
     const record = buildCurrentMealRecord();
@@ -201,10 +311,90 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
                 type="text"
                 value={foodName}
                 onChange={(event) => setFoodName(event.target.value)}
+                onFocus={() => {
+                  if (suggestions.length > 0) {
+                    setSuggestionsOpen(true);
+                  }
+                }}
                 placeholder={data.searchPlaceholder}
                 className="w-full rounded-xl border border-slate-100 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
+
+            <div className="mt-3 flex items-center justify-between px-1">
+              <p className="text-[11px] font-bold text-slate-400">
+                {selectedRef ? (
+                  <>
+                    {selectedRef.servingSize}
+                    {selectedRef.nutrientBaselineG
+                      ? ` · 기준 ${Math.round(selectedRef.nutrientBaselineG)}g`
+                      : ""}
+                  </>
+                ) : searching ? (
+                  "검색 중…"
+                ) : (
+                  "연관검색에서 선택하면 더 정확해져요."
+                )}
+              </p>
+              <p className="text-[11px] font-black text-slate-700">
+                예상 {estimatedDraftCalories.toLocaleString()} kcal
+              </p>
+            </div>
+
+            {suggestionsOpen && suggestions.length > 0 ? (
+              <div className="mt-3 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                <ul className="max-h-56 overflow-auto py-1">
+                  {suggestions.map((item) => {
+                    const category = [item.foodCat1Nm, item.foodCat2Nm]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <li key={item.foodCd}>
+                        <button
+                          type="button"
+                          className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+                          onClick={() => {
+                            setSelectedRef(item);
+                            setFoodName(item.foodNameKr);
+                            setSuggestionsOpen(false);
+                          }}
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-800">
+                              {item.foodNameKr}
+                            </p>
+                            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
+                              {category || item.servingSize}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-[11px] font-black text-indigo-600">
+                              {item.energyKcal != null
+                                ? `${Math.round(item.energyKcal).toLocaleString()} kcal`
+                                : "—"}
+                            </p>
+                            <p className="mt-0.5 text-[10px] font-bold text-slate-400">
+                              {item.nutrientBaselineG != null
+                                ? `기준 ${Math.round(item.nutrientBaselineG)}g`
+                                : ""}
+                            </p>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className="border-t border-slate-100 px-4 py-2">
+                  <button
+                    type="button"
+                    className="text-[11px] font-bold text-slate-400 hover:text-slate-600"
+                    onClick={() => setSuggestionsOpen(false)}
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-4 flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
               <div className="flex rounded-xl bg-white p-1 ring-1 ring-slate-100">
@@ -215,7 +405,12 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
                     <button
                       key={option.key}
                       type="button"
-                      onClick={() => setUnit(option.key)}
+                      onClick={() => {
+                        setUnit(option.key);
+                        if (option.key === "gram") {
+                          setGramInput(String(Math.max(1, Math.round(servingQuantity))));
+                        }
+                      }}
                       className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${
                         active
                           ? "bg-indigo-50 text-indigo-600"
@@ -229,23 +424,52 @@ export function MealLogScreen({ data }: MealLogScreenProps) {
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((previous) => Math.max(previous - 1, 1))}
-                  className="flex size-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-600 ring-1 ring-slate-100"
-                >
-                  -
-                </button>
-                <span className="min-w-10 text-center text-lg font-black text-slate-800">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((previous) => previous + 1)}
-                  className="flex size-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-600 ring-1 ring-slate-100"
-                >
-                  +
-                </button>
+                {unit === "gram" ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      inputMode="decimal"
+                      type="number"
+                      min={0.01}
+                      step={1}
+                      value={gramInput}
+                      onChange={(event) => setGramInput(event.target.value)}
+                      onBlur={() => {
+                        const parsed = Number.parseFloat(gramInput);
+                        if (!Number.isFinite(parsed)) {
+                          setGramInput(String(Math.max(1, Math.round(servingQuantity))));
+                          return;
+                        }
+                        const normalized = Math.max(parsed, 0.01);
+                        setGramInput(String(normalized));
+                      }}
+                      className="w-24 rounded-xl border border-slate-100 bg-white px-3 py-2 text-right text-sm font-black text-slate-800 outline-none transition focus:ring-2 focus:ring-indigo-500/20"
+                      aria-label="그램 입력"
+                    />
+                    <span className="text-[11px] font-bold text-slate-400">g</span>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setServingQuantity((previous) => Math.max(previous - 1, 1))
+                      }
+                      className="flex size-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-600 ring-1 ring-slate-100"
+                    >
+                      -
+                    </button>
+                    <span className="min-w-10 text-center text-lg font-black text-slate-800">
+                      {servingQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setServingQuantity((previous) => previous + 1)}
+                      className="flex size-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-600 ring-1 ring-slate-100"
+                    >
+                      +
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

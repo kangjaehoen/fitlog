@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,6 +22,8 @@ import com.fitlog.server.body.domain.BodyMetricRepository;
 import com.fitlog.server.common.support.KoreanDateText;
 import com.fitlog.server.goal.domain.Goal;
 import com.fitlog.server.goal.domain.GoalRepository;
+import com.fitlog.server.meal.domain.FoodNutrientRef;
+import com.fitlog.server.meal.domain.FoodNutrientRefRepository;
 import com.fitlog.server.meal.domain.MealItem;
 import com.fitlog.server.meal.domain.MealItemRepository;
 import com.fitlog.server.meal.domain.MealLog;
@@ -50,6 +53,7 @@ public class RecordingService {
 	private final AuthTokenService authTokenService;
 	private final MealLogRepository mealLogRepository;
 	private final MealItemRepository mealItemRepository;
+	private final FoodNutrientRefRepository foodNutrientRefRepository;
 	private final WorkoutSessionRepository workoutSessionRepository;
 	private final WorkoutExerciseRepository workoutExerciseRepository;
 	private final WorkoutSetRepository workoutSetRepository;
@@ -63,6 +67,7 @@ public class RecordingService {
 		AuthTokenService authTokenService,
 		MealLogRepository mealLogRepository,
 		MealItemRepository mealItemRepository,
+		FoodNutrientRefRepository foodNutrientRefRepository,
 		WorkoutSessionRepository workoutSessionRepository,
 		WorkoutExerciseRepository workoutExerciseRepository,
 		WorkoutSetRepository workoutSetRepository,
@@ -75,6 +80,7 @@ public class RecordingService {
 		this.authTokenService = authTokenService;
 		this.mealLogRepository = mealLogRepository;
 		this.mealItemRepository = mealItemRepository;
+		this.foodNutrientRefRepository = foodNutrientRefRepository;
 		this.workoutSessionRepository = workoutSessionRepository;
 		this.workoutExerciseRepository = workoutExerciseRepository;
 		this.workoutSetRepository = workoutSetRepository;
@@ -123,7 +129,7 @@ public class RecordingService {
 			"전체 기록 완료하기",
 			List.of("아침", "점심", "저녁", "간식"),
 			List.of(
-				new UnitOptionResponse("serving", "1회분"),
+				new UnitOptionResponse("serving", "1인분"),
 				new UnitOptionResponse("gram", "그램(g)")
 			),
 			"",
@@ -137,12 +143,26 @@ public class RecordingService {
 
 	@Transactional(readOnly = true)
 	public WorkoutLogDataResponse getWorkoutLog(String authToken) {
+		return getWorkoutLog(authToken, null);
+	}
+
+	@Transactional(readOnly = true)
+	public WorkoutLogDataResponse getWorkoutLog(String authToken, Long routineId) {
 		Long userId = this.authTokenService.parseUserId(authToken);
 		LocalDate today = LocalDate.now(SEOUL);
-		List<RoutineSetDraftResponse> routineTemplate = routineTemplate(userId);
-		String exerciseName = routineExerciseName(userId).orElse("");
+		Optional<Routine> routine = selectedRoutine(userId, routineId);
+		List<RoutineExerciseDraftResponse> routineExercises = routineExercises(routine);
+		List<RoutineSetDraftResponse> routineTemplate = routineExercises.stream()
+			.findFirst()
+			.map(RoutineExerciseDraftResponse::sets)
+			.orElse(List.of());
+		String exerciseName = routineExercises.stream()
+			.findFirst()
+			.map(RoutineExerciseDraftResponse::name)
+			.orElseGet(() -> routine.map(Routine::getName).orElse(""));
 
 		return new WorkoutLogDataResponse(
+			routineId == null ? null : routine.map(Routine::getId).orElse(null),
 			0,
 			"Workout Session",
 			"운동 종목 검색",
@@ -152,6 +172,7 @@ public class RecordingService {
 			List.of("쉬움", "적당함", "매우 힘듦"),
 			exerciseName,
 			routineTemplate,
+			routineExercises,
 			completedWorkoutExercises(userId, today)
 		);
 	}
@@ -164,15 +185,36 @@ public class RecordingService {
 			.findByUserIdAndLoggedDateAndMealType(userId, today, command.mealType())
 			.orElseGet(() -> this.mealLogRepository.save(MealLog.create(userId, command.mealType(), today)));
 
+		String normalizedFoodName = command.foodName().trim();
+		String foodCd = command.foodCd() == null ? null : command.foodCd().trim();
+		if (foodCd != null && foodCd.isBlank()) {
+			foodCd = null;
+		}
+
+		Optional<FoodNutrientRef> ref = resolveFoodRef(foodCd, normalizedFoodName);
+		Optional<NutrientScaleResult> scaled = ref.flatMap(value -> scaleNutrients(value, command.quantity(), command.quantityUnit()));
+
+		Integer caloriesKcal = scaled.map(NutrientScaleResult::caloriesKcal).orElse(command.caloriesKcal());
+		BigDecimal carbG = scaled.map(NutrientScaleResult::carbG).orElse(command.carbG());
+		BigDecimal proteinG = scaled.map(NutrientScaleResult::proteinG).orElse(command.proteinG());
+		BigDecimal fatG = scaled.map(NutrientScaleResult::fatG).orElse(command.fatG());
+		BigDecimal sugarG = scaled.map(NutrientScaleResult::sugarG).orElse(null);
+		BigDecimal sodiumMg = scaled.map(NutrientScaleResult::sodiumMg).orElse(null);
+		BigDecimal consumedGrams = scaled.map(NutrientScaleResult::consumedGrams).orElse(null);
+
 		this.mealItemRepository.save(MealItem.create(
 			mealLog.getId(),
-			command.foodName().trim(),
+			normalizedFoodName,
 			command.quantity(),
 			command.quantityUnit(),
-			command.caloriesKcal(),
-			command.carbG(),
-			command.proteinG(),
-			command.fatG()
+			caloriesKcal,
+			carbG,
+			proteinG,
+			fatG,
+			ref.map(FoodNutrientRef::getFoodCd).orElse(foodCd),
+			consumedGrams,
+			sugarG,
+			sodiumMg
 		));
 	}
 
@@ -254,8 +296,15 @@ public class RecordingService {
 		);
 	}
 
-	private List<RoutineSetDraftResponse> routineTemplate(Long userId) {
-		Optional<Routine> routine = this.routineRepository.findFirstByUserIdAndActiveTrueOrderByIdDesc(userId);
+	private Optional<Routine> selectedRoutine(Long userId, Long routineId) {
+		if (routineId != null) {
+			return this.routineRepository.findByIdAndUserIdAndActiveTrue(routineId, userId);
+		}
+
+		return this.routineRepository.findFirstByUserIdAndActiveTrueOrderByIdDesc(userId);
+	}
+
+	private List<RoutineExerciseDraftResponse> routineExercises(Optional<Routine> routine) {
 		if (routine.isEmpty()) {
 			return List.of();
 		}
@@ -265,23 +314,33 @@ public class RecordingService {
 			return List.of();
 		}
 
-		return this.routineExerciseSetRepository.findByRoutineExerciseIdIn(List.of(exercises.get(0).getId()))
+		Map<Long, List<RoutineExerciseSet>> setsByExerciseId = this.routineExerciseSetRepository
+			.findByRoutineExerciseIdIn(exercises.stream().map(RoutineExercise::getId).toList())
 			.stream()
-			.sorted(Comparator.comparingInt(RoutineExerciseSet::getSetOrder))
-			.map(set -> new RoutineSetDraftResponse(
-				set.getTargetWeightKg() == null ? BigDecimal.ZERO : set.getTargetWeightKg(),
-				set.getTargetRepetitions() == null ? 0 : set.getTargetRepetitions(),
-				false
+			.collect(Collectors.groupingBy(RoutineExerciseSet::getRoutineExerciseId));
+
+		return exercises.stream()
+			.map(exercise -> new RoutineExerciseDraftResponse(
+				routineExerciseName(routine.get(), exercise),
+				setsByExerciseId.getOrDefault(exercise.getId(), List.of()).stream()
+					.sorted(Comparator.comparingInt(RoutineExerciseSet::getSetOrder))
+					.map(set -> new RoutineSetDraftResponse(
+						set.getTargetWeightKg() == null ? BigDecimal.ZERO : set.getTargetWeightKg(),
+						set.getTargetRepetitions() == null ? 0 : set.getTargetRepetitions(),
+						false
+					))
+					.toList()
 			))
 			.toList();
 	}
 
-	private Optional<String> routineExerciseName(Long userId) {
-		return this.routineRepository.findFirstByUserIdAndActiveTrueOrderByIdDesc(userId)
-			.flatMap(routine -> this.routineExerciseRepository.findByRoutineIdOrderBySortOrderAsc(routine.getId())
-				.stream()
-				.findFirst()
-				.map(RoutineExercise::getExerciseName));
+	private String routineExerciseName(Routine routine, RoutineExercise exercise) {
+		String exerciseName = exercise.getExerciseName();
+		if (exerciseName == null || exerciseName.isBlank() || exerciseName.equals("새 운동")) {
+			return routine.getName();
+		}
+
+		return exerciseName;
 	}
 
 	private List<CompletedExerciseResponse> completedWorkoutExercises(Long userId, LocalDate today) {
@@ -364,7 +423,7 @@ public class RecordingService {
 		BigDecimal value = quantity == null ? BigDecimal.ZERO : quantity.stripTrailingZeros();
 		return switch (unit) {
 			case GRAM -> value.toPlainString() + "g";
-			case SERVING -> value.toPlainString() + "회분";
+			case SERVING -> value.toPlainString() + "인분";
 		};
 	}
 
@@ -372,15 +431,114 @@ public class RecordingService {
 		return String.format("%,d", value);
 	}
 
+	private Optional<FoodNutrientRef> resolveFoodRef(String foodCd, String normalizedFoodName) {
+		if (foodCd != null && !foodCd.isBlank()) {
+			return this.foodNutrientRefRepository.findById(foodCd);
+		}
+		// foodCd가 없는 기록도 영양 계산을 할 수 있도록 "정확한 단일 매칭"만 허용
+		String normalized = normalizeFoodName(normalizedFoodName);
+		if (normalized.isBlank()) {
+			return Optional.empty();
+		}
+
+		List<FoodNutrientRef> candidates = this.foodNutrientRefRepository.searchByName(normalized);
+		List<FoodNutrientRef> exactMatches = candidates.stream()
+			.filter(c -> normalized.equals(normalizeFoodName(c.getFoodNameKr())))
+			.toList();
+		if (exactMatches.size() != 1) {
+			return Optional.empty();
+		}
+		return Optional.of(exactMatches.get(0));
+	}
+
+	private static String normalizeFoodName(String value) {
+		if (value == null) {
+			return "";
+		}
+		return value.trim().replace(" ", "").toLowerCase(Locale.ROOT);
+	}
+
 	public record MealRecordCommand(
 		MealType mealType,
 		String foodName,
+		String foodCd,
 		BigDecimal quantity,
 		QuantityUnit quantityUnit,
 		Integer caloriesKcal,
 		BigDecimal carbG,
 		BigDecimal proteinG,
 		BigDecimal fatG
+	) {
+	}
+
+	private static Optional<NutrientScaleResult> scaleNutrients(FoodNutrientRef ref, BigDecimal quantity, QuantityUnit quantityUnit) {
+		if (ref == null || quantity == null || quantityUnit == null) {
+			return Optional.empty();
+		}
+		if (quantity.signum() <= 0) {
+			return Optional.empty();
+		}
+
+		BigDecimal baselineG = ref.getNutrientBaselineG();
+		BigDecimal factor;
+		BigDecimal consumedGrams;
+
+		switch (quantityUnit) {
+			case SERVING -> {
+				// 기준 g가 없어도 "1회분" 기준 영양성분으로 계산 가능
+				factor = quantity;
+				consumedGrams = (baselineG != null && baselineG.signum() > 0)
+					? quantity.multiply(baselineG).setScale(4, RoundingMode.HALF_UP)
+					: null;
+			}
+			case GRAM -> {
+				// 기준 g가 없으면 100g 기준으로라도 계산 (consumedGrams는 입력값 그대로)
+				BigDecimal effectiveBaseline = (baselineG != null && baselineG.signum() > 0)
+					? baselineG
+					: BigDecimal.valueOf(100);
+				factor = quantity.divide(effectiveBaseline, 12, RoundingMode.HALF_UP);
+				consumedGrams = quantity.setScale(4, RoundingMode.HALF_UP);
+			}
+			default -> {
+				return Optional.empty();
+			}
+		}
+
+		Integer caloriesKcal = scaleToInteger(ref.getEnergyKcal(), factor);
+
+		return Optional.of(new NutrientScaleResult(
+			consumedGrams,
+			caloriesKcal,
+			scaleTo2(ref.getCarbG(), factor),
+			scaleTo2(ref.getProteinG(), factor),
+			scaleTo2(ref.getFatG(), factor),
+			scaleTo2(ref.getSugarG(), factor),
+			scaleTo2(ref.getSodiumMg(), factor)
+		));
+	}
+
+	private static BigDecimal scaleTo2(BigDecimal baseline, BigDecimal factor) {
+		if (baseline == null || factor == null) {
+			return null;
+		}
+		return baseline.multiply(factor).setScale(2, RoundingMode.HALF_UP);
+	}
+
+	private static Integer scaleToInteger(BigDecimal baseline, BigDecimal factor) {
+		if (baseline == null || factor == null) {
+			return null;
+		}
+		return baseline.multiply(factor).setScale(0, RoundingMode.HALF_UP).intValue();
+	}
+
+	private record NutrientScaleResult(
+		BigDecimal consumedGrams,
+		Integer caloriesKcal,
+		BigDecimal carbG,
+		BigDecimal proteinG,
+		BigDecimal fatG,
+		BigDecimal sugarG,
+		BigDecimal sodiumMg
 	) {
 	}
 
@@ -463,6 +621,7 @@ public class RecordingService {
 	}
 
 	public record WorkoutLogDataResponse(
+		Long routineId,
 		Integer initialDurationSeconds,
 		String sessionLabel,
 		String searchPlaceholder,
@@ -472,7 +631,14 @@ public class RecordingService {
 		List<String> intensityOptions,
 		String exerciseName,
 		List<RoutineSetDraftResponse> routineTemplate,
+		List<RoutineExerciseDraftResponse> routineExercises,
 		List<CompletedExerciseResponse> completedExercises
+	) {
+	}
+
+	public record RoutineExerciseDraftResponse(
+		String name,
+		List<RoutineSetDraftResponse> sets
 	) {
 	}
 

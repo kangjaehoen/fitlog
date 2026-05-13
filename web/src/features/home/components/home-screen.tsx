@@ -9,12 +9,16 @@ import { WorkoutFocusSection } from "./workout-focus-section";
 
 type HomeScreenProps = {
   dashboard: HomeDashboard;
+  unreadNotificationCount: number;
 };
 
-export function HomeScreen({ dashboard }: HomeScreenProps) {
+export function HomeScreen({
+  dashboard,
+  unreadNotificationCount,
+}: HomeScreenProps) {
   return (
     <div className="min-h-screen pb-[132px]">
-      <HomeHeader />
+      <HomeHeader hasUnreadNotifications={unreadNotificationCount > 0} />
 
       <main className="mx-auto flex w-full max-w-[420px] flex-col gap-4 px-4 py-4">
         <RecordOverviewCard

@@ -28,6 +28,7 @@ export type BodyMetricRecordPayload = {
 export type MealRecordPayload = {
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   foodName: string;
+  foodCd?: string | null;
   quantity: number;
   quantityUnit: "SERVING" | "GRAM";
   caloriesKcal: number;
@@ -58,8 +59,13 @@ export async function getMealLog(token?: string): Promise<MealLogData> {
   });
 }
 
-export async function getWorkoutLog(token?: string): Promise<WorkoutLogData> {
-  return apiClient.get<WorkoutLogData>("/api/records/workouts/today", {
+export async function getWorkoutLog(
+  token?: string,
+  routineId?: number,
+): Promise<WorkoutLogData> {
+  const query = routineId ? `?routineId=${routineId}` : "";
+
+  return apiClient.get<WorkoutLogData>(`/api/records/workouts/today${query}`, {
     cache: "no-store",
     headers: authorizationHeaders(token),
   });

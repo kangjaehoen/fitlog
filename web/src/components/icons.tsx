@@ -211,6 +211,15 @@ export function XIcon({ className }: IconProps) {
   );
 }
 
+export function PlusIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </IconBase>
+  );
+}
+
 export function PencilIcon({ className }: IconProps) {
   return (
     <IconBase className={className}>

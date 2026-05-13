@@ -25,7 +25,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(`API request failed: ${response.status} ${response.statusText}`);
   }
 
-  return (await response.json()) as T;
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+
+  if (!text) {
+    return undefined as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 export const apiClient = {
@@ -47,6 +57,13 @@ export const apiClient = {
       ...options,
       body: body === undefined ? undefined : JSON.stringify(body),
       method: "PATCH",
+    });
+  },
+  delete<T>(path: string, body?: unknown, options?: MutationOptions) {
+    return request<T>(path, {
+      ...options,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      method: "DELETE",
     });
   },
 };

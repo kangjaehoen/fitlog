@@ -18,3 +18,11 @@ app:
   cors:
     allowed-origins:
       - http://localhost:3000
+
+webpush:
+  vapid:
+    public-key: test-vapid-public-key
+    private-key: test-vapid-private-key
+    subject: mailto:test@example.com
+  scheduler:
+    enabled: false

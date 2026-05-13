@@ -1,6 +1,7 @@
 type ToggleSwitchProps = {
   checked: boolean;
   onToggle: () => void;
+  disabled?: boolean;
   tone?: "indigo" | "amber";
   label: string;
 };
@@ -8,6 +9,7 @@ type ToggleSwitchProps = {
 export function ToggleSwitch({
   checked,
   onToggle,
+  disabled = false,
   tone = "indigo",
   label,
 }: ToggleSwitchProps) {
@@ -19,8 +21,9 @@ export function ToggleSwitch({
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      disabled={disabled}
       onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-60 ${
         checked ? activeTone : "bg-slate-200"
       }`}
     >

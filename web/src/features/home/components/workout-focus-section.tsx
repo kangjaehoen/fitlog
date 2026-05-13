@@ -1,14 +1,60 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ClockIcon, FireIcon } from "@/components/icons";
+import { hasTodayWorkoutDraft } from "@/features/recording/workout-draft-storage";
 import type { HomeDashboard } from "../types";
 
 type WorkoutFocusSectionProps = {
   workout: HomeDashboard["workout"];
 };
 
+const START_ACTION_LABEL = "오늘 운동 시작하기";
+const CONTINUE_ACTION_LABEL = "이어서 운동 기록하기";
+const SERVER_VIEW_ACTION_LABEL = "오늘 운동 기록 보기";
+const VIEW_ACTION_LABEL = "운동 기록 보기";
+
+function isCompletedWorkout(workout: HomeDashboard["workout"]) {
+  if (
+    workout.actionLabel === SERVER_VIEW_ACTION_LABEL ||
+    workout.actionLabel === VIEW_ACTION_LABEL
+  ) {
+    return true;
+  }
+
+  const [completedText, totalText] = workout.progressLabel.split("/");
+  const completed = Number(completedText);
+  const total = Number(totalText?.replace(/\D/g, ""));
+
+  return Number.isFinite(completed) && total > 0 && completed >= total;
+}
+
+function actionLabelFor(workout: HomeDashboard["workout"]) {
+  if (isCompletedWorkout(workout)) {
+    return VIEW_ACTION_LABEL;
+  }
+
+  return workout.actionLabel ?? START_ACTION_LABEL;
+}
+
 export function WorkoutFocusSection({
   workout,
 }: WorkoutFocusSectionProps) {
+  const [actionLabel, setActionLabel] = useState(actionLabelFor(workout));
+
+  useEffect(() => {
+    const draftCheckTimer = window.setTimeout(() => {
+      setActionLabel(
+        !isCompletedWorkout(workout) && hasTodayWorkoutDraft()
+          ? CONTINUE_ACTION_LABEL
+          : actionLabelFor(workout),
+      );
+    }, 0);
+
+    return () => window.clearTimeout(draftCheckTimer);
+  }, [workout]);
+
   return (
     <section className="rounded-[28px] border border-[#c7d2fe] bg-white/90 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-[8px]">
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -38,7 +84,7 @@ export function WorkoutFocusSection({
         href="/today-workout-log"
         className="inline-flex w-full items-center justify-center rounded-[22px] bg-indigo-600 px-4 py-[14px] text-sm font-extrabold text-white transition hover:bg-indigo-700"
       >
-        이어서 운동 기록하기
+        {actionLabel}
       </Link>
     </section>
   );

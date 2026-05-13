@@ -40,6 +40,7 @@ export type MealLogData = {
 };
 
 export type WorkoutLogData = {
+  routineId?: number | null;
   initialDurationSeconds: number;
   sessionLabel: string;
   searchPlaceholder: string;
@@ -52,6 +53,14 @@ export type WorkoutLogData = {
     weight: number;
     reps: number;
     done?: boolean;
+  }>;
+  routineExercises?: Array<{
+    name: string;
+    sets: Array<{
+      weight: number;
+      reps: number;
+      done?: boolean;
+    }>;
   }>;
   completedExercises: Array<{
     title: string;

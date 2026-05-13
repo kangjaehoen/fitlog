@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -61,10 +62,11 @@ public class RecordingController {
 
 	@GetMapping("/workouts/today")
 	public RecordingService.WorkoutLogDataResponse getWorkoutLog(
-		@RequestHeader(value = "Authorization", required = false) String authorizationHeader
+		@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+		@RequestParam(value = "routineId", required = false) Long routineId
 	) {
 		try {
-			return this.recordingService.getWorkoutLog(extractBearerToken(authorizationHeader));
+			return this.recordingService.getWorkoutLog(extractBearerToken(authorizationHeader), routineId);
 		}
 		catch (IllegalArgumentException exception) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authorization token");
@@ -124,6 +126,7 @@ public class RecordingController {
 	public record MealRecordRequest(
 		@NotNull MealType mealType,
 		@NotBlank String foodName,
+		String foodCd,
 		@NotNull @DecimalMin("0.01") BigDecimal quantity,
 		@NotNull QuantityUnit quantityUnit,
 		@NotNull @Min(0) Integer caloriesKcal,
@@ -136,6 +139,7 @@ public class RecordingController {
 			return new RecordingService.MealRecordCommand(
 				this.mealType,
 				this.foodName,
+				this.foodCd,
 				this.quantity,
 				this.quantityUnit,
 				this.caloriesKcal,

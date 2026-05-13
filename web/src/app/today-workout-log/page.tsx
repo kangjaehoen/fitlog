@@ -9,14 +9,30 @@ export const metadata = {
   title: "운동 기록하기",
 };
 
-export default async function TodayWorkoutLogPage() {
+type TodayWorkoutLogPageProps = {
+  searchParams?: Promise<{
+    routineId?: string | string[];
+  }>;
+};
+
+export default async function TodayWorkoutLogPage({
+  searchParams,
+}: TodayWorkoutLogPageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE_KEY)?.value;
   if (!token) {
     redirect("/");
   }
 
-  const workoutLog = await getWorkoutLog(token);
+  const params = await searchParams;
+  const routineIdParam = Array.isArray(params?.routineId)
+    ? params?.routineId[0]
+    : params?.routineId;
+  const routineId = routineIdParam ? Number(routineIdParam) : undefined;
+  const workoutLog = await getWorkoutLog(
+    token,
+    Number.isFinite(routineId) ? routineId : undefined,
+  );
 
-  return <WorkoutLogScreen data={workoutLog} />;
+  return <WorkoutLogScreen key={workoutLog.routineId ?? "draft"} data={workoutLog} />;
 }

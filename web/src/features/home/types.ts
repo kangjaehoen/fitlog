@@ -21,6 +21,7 @@ export type HomeDashboard = {
     progressLabel: string;
     duration: string;
     calories: string;
+    actionLabel?: string;
   };
   weeklySummary: Array<{
     label: string;

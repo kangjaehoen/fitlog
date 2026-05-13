@@ -110,10 +110,13 @@ public class AppContentService {
 		Optional<BodyMetric> latestBodyMetric = this.bodyMetricRepository
 			.findFirstByUserIdAndMeasuredOnLessThanEqualOrderByMeasuredOnDescIdDesc(userId, today);
 
+		// 목표 탄/단/지가 없으면 그래프가 항상 0%로 보이므로, "표시용"으로만 칼로리 목표 기반 추정치를 사용
+		GoalTargets displayTargets = targets.withDerivedMacroGoals();
+
 		int caloriePercent = percent(todayNutrition.calories(), targets.dailyCalorieGoal());
-		int carbPercent = percent(todayNutrition.carbG(), targets.dailyCarbGoalG());
-		int proteinPercent = percent(todayNutrition.proteinG(), targets.dailyProteinGoalG());
-		int fatPercent = percent(todayNutrition.fatG(), targets.dailyFatGoalG());
+		int carbPercent = percent(todayNutrition.carbG(), displayTargets.dailyCarbGoalG());
+		int proteinPercent = percent(todayNutrition.proteinG(), displayTargets.dailyProteinGoalG());
+		int fatPercent = percent(todayNutrition.fatG(), displayTargets.dailyFatGoalG());
 		int goalPercent = averageGoalPercent(targets, caloriePercent, carbPercent, proteinPercent, fatPercent);
 
 		return new HomeDashboardResponse(
@@ -216,7 +219,8 @@ public class AppContentService {
 				"\uC624\uB298\uC758 \uB8E8\uD2F4: \uAE30\uB85D \uC5C6\uC74C",
 				"0/0 \uC644\uB8CC",
 				"0\uBD84",
-				"0 kcal"
+				"0 kcal",
+				"\uC624\uB298 \uC6B4\uB3D9 \uC2DC\uC791\uD558\uAE30"
 			);
 		}
 
@@ -231,7 +235,8 @@ public class AppContentService {
 			"\uC624\uB298\uC758 \uB8E8\uD2F4: " + routineName(workoutSession),
 			workoutProgressLabel(workoutSession, completed, total),
 			formatDuration(workoutSession.getDurationMinutes()),
-			formatCalories(workoutSession.getCaloriesBurned())
+			formatCalories(workoutSession.getCaloriesBurned()),
+			workoutActionLabel(workoutSession)
 		);
 	}
 
@@ -323,6 +328,14 @@ public class AppContentService {
 			case COMPLETED -> "\uC644\uB8CC";
 			case IN_PROGRESS -> "\uC9C4\uD589 \uC911";
 			case CANCELLED -> "\uCDE8\uC18C";
+		};
+	}
+
+	private static String workoutActionLabel(WorkoutSession session) {
+		return switch (session.getStatus()) {
+			case COMPLETED -> "\uC624\uB298 \uC6B4\uB3D9 \uAE30\uB85D \uBCF4\uAE30";
+			case IN_PROGRESS -> "\uC774\uC5B4\uC11C \uC6B4\uB3D9 \uAE30\uB85D\uD558\uAE30";
+			case CANCELLED -> "\uC624\uB298 \uC6B4\uB3D9 \uC2DC\uC791\uD558\uAE30";
 		};
 	}
 
@@ -607,8 +620,53 @@ public class AppContentService {
 			);
 		}
 
+		private GoalTargets withDerivedMacroGoals() {
+			Integer calories = this.dailyCalorieGoal;
+			if (calories == null || calories <= 0) {
+				return this;
+			}
+
+			BigDecimal derivedCarbG = deriveCarbGoalG(calories);
+			BigDecimal derivedProteinG = deriveProteinGoalG(calories);
+			BigDecimal derivedFatG = deriveFatGoalG(calories);
+
+			return new GoalTargets(
+				this.dailyCalorieGoal,
+				isMissingOrZero(this.dailyCarbGoalG) ? derivedCarbG : this.dailyCarbGoalG,
+				isMissingOrZero(this.dailyProteinGoalG) ? derivedProteinG : this.dailyProteinGoalG,
+				isMissingOrZero(this.dailyFatGoalG) ? derivedFatG : this.dailyFatGoalG
+			);
+		}
+
 		private static GoalTargets empty() {
 			return new GoalTargets(null, null, null, null);
+		}
+
+		private static boolean isMissingOrZero(BigDecimal value) {
+			return value == null || value.signum() <= 0;
+		}
+
+		/**
+		 * 기본 매크로 비율(칼로리 기준): 탄 50% / 단 25% / 지 25%
+		 * - 탄/단: 4kcal per g
+		 * - 지: 9kcal per g
+		 */
+		private static BigDecimal deriveCarbGoalG(int dailyCalorieGoal) {
+			return BigDecimal.valueOf(dailyCalorieGoal)
+				.multiply(BigDecimal.valueOf(0.50))
+				.divide(BigDecimal.valueOf(4), 2, RoundingMode.HALF_UP);
+		}
+
+		private static BigDecimal deriveProteinGoalG(int dailyCalorieGoal) {
+			return BigDecimal.valueOf(dailyCalorieGoal)
+				.multiply(BigDecimal.valueOf(0.25))
+				.divide(BigDecimal.valueOf(4), 2, RoundingMode.HALF_UP);
+		}
+
+		private static BigDecimal deriveFatGoalG(int dailyCalorieGoal) {
+			return BigDecimal.valueOf(dailyCalorieGoal)
+				.multiply(BigDecimal.valueOf(0.25))
+				.divide(BigDecimal.valueOf(9), 2, RoundingMode.HALF_UP);
 		}
 	}
 
@@ -905,7 +963,8 @@ public class AppContentService {
 		String routine,
 		String progressLabel,
 		String duration,
-		String calories
+		String calories,
+		String actionLabel
 	) {
 	}
 

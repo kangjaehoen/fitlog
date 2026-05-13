@@ -2,7 +2,9 @@ spring:
   application:
     name: fitlog-server
   config:
-    import: optional:file:./local-secrets.properties
+    import:
+      - optional:file:./local-secrets.properties
+      - optional:file:./server/local-secrets.properties
   profiles:
     default: local
   datasource:
@@ -21,6 +23,15 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+webpush:
+  vapid:
+    public-key: ${WEBPUSH_VAPID_PUBLIC_KEY:}
+    private-key: ${WEBPUSH_VAPID_PRIVATE_KEY:}
+    subject: ${WEBPUSH_VAPID_SUBJECT:mailto:admin@example.com}
+  scheduler:
+    enabled: ${WEBPUSH_SCHEDULER_ENABLED:true}
+    fixed-delay-ms: ${WEBPUSH_SCHEDULER_FIXED_DELAY_MS:60000}
+
 management:
   endpoints:
     web:
@@ -37,6 +48,16 @@ info:
     java-version: ${java.version}
 
 app:
+  # 공공데이터포털 식품영양성분 DB — https://www.data.go.kr/data/15127578/openapi.do
+  # 활용 페이지 Swagger의 엔드포인트명이 다를 경우 inquiry-operation 등을 수정하세요.
+  data-gov-food-nutrition:
+    service-key: ${DATAGOV_SERVICE_KEY:}
+    base-url:
+    inquiry-operation:
+    import-http-enabled: ${FOOD_IMPORT_HTTP_ENABLED:false}
+    import-secret: ${FOOD_IMPORT_SECRET:}
+    page-size: ${FOOD_IMPORT_PAGE_SIZE:100}
+    pause-ms-between-requests: ${FOOD_IMPORT_PAUSE_MS:100}
   auth:
     token-secret: ${AUTH_TOKEN_SECRET:fitlog-local-dev-secret}
     token-validity-hours: ${AUTH_TOKEN_VALIDITY_HOURS:168}
