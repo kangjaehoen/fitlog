@@ -10,11 +10,20 @@ spring:
     open-in-view: false
 
 app:
+  upload:
+    profile-images:
+      storage-path: build/test-profile-images
+      public-path: /uploads/profile-images
+      max-bytes: 5242880
   oauth:
     kakao:
       client-id: test-kakao-client-id
       client-secret: test-kakao-client-secret
       redirect-uri: http://localhost:3000/auth/kakao/callback
+    google:
+      client-id: test-google-client-id
+      client-secret: test-google-client-secret
+      redirect-uri: http://localhost:3000/auth/google/callback
   cors:
     allowed-origins:
       - http://localhost:3000

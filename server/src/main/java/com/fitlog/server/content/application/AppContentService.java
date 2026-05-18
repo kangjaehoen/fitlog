@@ -155,9 +155,9 @@ public class AppContentService {
 		LocalDate weekEnd = weekStart.plusDays(6);
 		User user = this.userRepository.findById(userId)
 			.orElseThrow(() -> new IllegalArgumentException("User not found"));
-		String displayName = this.userProfileRepository.findByUserId(userId)
-			.map(UserProfile::getNickname)
-			.orElse(user.getEmail());
+		Optional<UserProfile> profile = this.userProfileRepository.findByUserId(userId);
+		String displayName = profile.map(UserProfile::getNickname).orElse(user.getEmail());
+		String profileImageUrl = profile.map(UserProfile::getProfileImageUrl).orElse(null);
 		List<WorkoutSession> monthlySessions = completedSessions(
 			this.workoutSessionRepository.findByUserIdAndSessionDateBetween(userId, monthStart, today)
 		);
@@ -174,6 +174,7 @@ public class AppContentService {
 
 		return new ProfileScreenResponse(
 			displayName,
+			profileImageUrl,
 			startedDaysAgo(user, today),
 			"",
 			recordStreak(userId, today) + "일 연속",
@@ -672,6 +673,7 @@ public class AppContentService {
 
 	public record ProfileScreenResponse(
 		String displayName,
+		String profileImageUrl,
 		int startedDaysAgo,
 		String levelLabel,
 		String streakLabel,

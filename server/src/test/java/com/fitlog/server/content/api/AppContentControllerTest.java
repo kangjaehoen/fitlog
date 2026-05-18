@@ -1,6 +1,7 @@
 package com.fitlog.server.content.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.mock.web.MockMultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitlog.server.common.support.KoreanDateText;
@@ -108,6 +110,59 @@ class AppContentControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.nickname").value("FitLog Strong"));
+	}
+
+	@Test
+	void profileImageCanBeUploaded() throws Exception {
+		String token = loginToken("profile-image");
+		MockMultipartFile image = new MockMultipartFile(
+			"image",
+			"profile.png",
+			"image/png",
+			new byte[] { 1, 2, 3, 4 }
+		);
+
+		MvcResult result = this.mockMvc.perform(multipart("/api/account/profile/image")
+				.file(image)
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.profileImageUrl").isString())
+			.andReturn();
+
+		String profileImageUrl = this.objectMapper.readTree(result.getResponse().getContentAsString())
+			.path("profileImageUrl")
+			.asText();
+
+		this.mockMvc.perform(get("/api/account/profile")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.profileImageUrl").value(profileImageUrl));
+	}
+
+	@Test
+	void accountWithdrawalSoftDeletesUserAndInvalidatesAccess() throws Exception {
+		String token = loginToken("account-withdrawal");
+
+		this.mockMvc.perform(post("/api/account/withdraw")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.ok").value(true));
+
+		this.mockMvc.perform(get("/api/auth/me")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isUnauthorized());
+
+		this.mockMvc.perform(post("/api/auth/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "socialType": "KAKAO",
+					  "providerUserId": "fitlog-demo-account-withdrawal",
+					  "email": "kakao.account-withdrawal@fitlog.local",
+					  "nickname": "Kakao User"
+					}
+					"""))
+			.andExpect(status().isUnauthorized());
 	}
 
 	@Test

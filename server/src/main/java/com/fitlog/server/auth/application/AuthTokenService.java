@@ -12,6 +12,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fitlog.server.user.domain.UserRepository;
+import com.fitlog.server.user.domain.UserStatus;
+
 @Service
 public class AuthTokenService {
 
@@ -19,13 +22,16 @@ public class AuthTokenService {
 
 	private final SecretKeySpec secretKeySpec;
 	private final Duration tokenValidity;
+	private final UserRepository userRepository;
 
 	public AuthTokenService(
 		@Value("${app.auth.token-secret:fitlog-local-dev-secret}") String tokenSecret,
-		@Value("${app.auth.token-validity-hours:168}") long tokenValidityHours
+		@Value("${app.auth.token-validity-hours:168}") long tokenValidityHours,
+		UserRepository userRepository
 	) {
 		this.secretKeySpec = new SecretKeySpec(tokenSecret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM);
 		this.tokenValidity = Duration.ofHours(tokenValidityHours);
+		this.userRepository = userRepository;
 	}
 
 	public IssuedToken issue(Long userId) {
@@ -54,7 +60,12 @@ public class AuthTokenService {
 			throw new IllegalArgumentException("Expired auth token");
 		}
 
-		return Long.parseLong(payloadParts[0]);
+		Long userId = Long.parseLong(payloadParts[0]);
+		if (!this.userRepository.existsByIdAndStatus(userId, UserStatus.ACTIVE)) {
+			throw new IllegalArgumentException("Inactive auth token user");
+		}
+
+		return userId;
 	}
 
 	private boolean signatureMatches(String encodedPayload, String signature) {

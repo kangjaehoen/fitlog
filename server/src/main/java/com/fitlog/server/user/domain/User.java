@@ -60,4 +60,12 @@ public class User extends BaseTimeEntity {
 	public static User createSocialUser(String email, SocialType socialType, String providerUserId) {
 		return new User(email, socialType, providerUserId);
 	}
+
+	public boolean isActive() {
+		return this.status == UserStatus.ACTIVE;
+	}
+
+	public void withdraw() {
+		this.status = UserStatus.WITHDRAWN;
+	}
 }

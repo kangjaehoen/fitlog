@@ -1,5 +1,6 @@
 export type ProfileScreenData = {
   displayName: string;
+  profileImageUrl?: string | null;
   startedDaysAgo: number;
   levelLabel: string;
   streakLabel: string;
@@ -57,17 +58,17 @@ export type SocialLoginData = {
   subtitle: string;
   options: Array<{
     provider: string;
-    providerType: "KAKAO" | "GOOGLE" | "APPLE";
+    providerType: "KAKAO" | "GOOGLE";
     label: string;
     href: string;
-    tone: "kakao" | "google" | "apple";
+    tone: "kakao" | "google";
   }>;
 };
 
 export type AuthUser = {
   id: number;
   email: string;
-  socialType: "KAKAO" | "GOOGLE" | "APPLE";
+  socialType: "KAKAO" | "GOOGLE";
   nickname: string;
 };
 
@@ -91,4 +92,23 @@ export type UnsubscribeData = {
   agreementLabel: string;
   confirmMessage: string;
   successMessage: string;
+};
+
+export type PrivacyPolicyData = {
+  effectiveDate: string;
+  lastUpdated: string;
+  intro: string;
+  summaryItems: Array<{
+    label: string;
+    value: string;
+  }>;
+  sections: Array<{
+    title: string;
+    description?: string;
+    items: Array<{
+      label: string;
+      values: string[];
+    }>;
+  }>;
+  notice: string;
 };

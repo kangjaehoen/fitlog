@@ -61,11 +61,20 @@ app:
   auth:
     token-secret: ${AUTH_TOKEN_SECRET:fitlog-local-dev-secret}
     token-validity-hours: ${AUTH_TOKEN_VALIDITY_HOURS:168}
+  upload:
+    profile-images:
+      storage-path: ${PROFILE_IMAGE_STORAGE_PATH:uploads/profile-images}
+      public-path: ${PROFILE_IMAGE_PUBLIC_PATH:/uploads/profile-images}
+      max-bytes: ${PROFILE_IMAGE_MAX_BYTES:5242880}
   oauth:
     kakao:
       client-id: ${KAKAO_CLIENT_ID:}
       client-secret: ${KAKAO_CLIENT_SECRET:}
       redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/auth/kakao/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:3000/auth/google/callback}
   cors:
     allowed-origins:
       - ${web.origin:http://localhost:3000}

@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getSocialLoginRedirectUrl, loginWithSocialProvider } from "../api";
-import { persistAuthSession } from "../auth-session";
+import { getSocialLoginRedirectUrl } from "../api";
 import type { SocialLoginData } from "../types";
 import { FitLogMark, ProviderLogo } from "./brand-icons";
 
@@ -14,11 +12,9 @@ type SocialLoginScreenProps = {
 const toneStyles = {
   kakao: "bg-[#FEE500] text-[#191919]",
   google: "border border-slate-200 bg-white text-slate-700 shadow-sm",
-  apple: "bg-black text-white",
 } as const;
 
 export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
-  const router = useRouter();
   const [loadingProvider, setLoadingProvider] = useState<
     SocialLoginData["options"][number]["providerType"] | null
   >(null);
@@ -32,14 +28,7 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
 
     try {
       const redirectUrl = await getSocialLoginRedirectUrl(providerType);
-      if (redirectUrl) {
-        window.location.assign(redirectUrl);
-        return;
-      }
-
-      const response = await loginWithSocialProvider(providerType);
-      persistAuthSession(response);
-      router.push("/main");
+      window.location.assign(redirectUrl);
     } catch {
       setErrorMessage("로그인 서버에 연결할 수 없습니다. 서버와 DB 설정을 확인해주세요.");
     } finally {
@@ -75,13 +64,7 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
                 disabled={loadingProvider !== null}
                 className={`flex h-14 w-full items-center justify-center gap-3 rounded-[16px] text-[16px] font-bold transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${toneStyles[option.tone]}`}
               >
-                <span
-                  className={`flex size-7 items-center justify-center ${
-                    option.providerType === "APPLE"
-                      ? "text-white"
-                      : "text-[#191919]"
-                  }`}
-                >
+                <span className="flex size-7 items-center justify-center text-[#191919]">
                   <ProviderLogo
                     providerType={option.providerType}
                     className="size-5"

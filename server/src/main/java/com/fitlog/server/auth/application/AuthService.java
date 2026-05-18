@@ -36,6 +36,9 @@ public class AuthService {
 			.orElseGet(() -> this.userRepository.save(
 				User.createSocialUser(command.email(), command.socialType(), command.providerUserId())
 			));
+		if (!user.isActive()) {
+			throw new IllegalArgumentException("User is not active");
+		}
 
 		UserProfile profile = this.userProfileRepository
 			.findByUserId(user.getId())
