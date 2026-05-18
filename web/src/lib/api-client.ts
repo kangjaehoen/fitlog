@@ -13,12 +13,16 @@ function buildUrl(path: string) {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers);
+  const isFormData =
+    typeof FormData !== "undefined" && init?.body instanceof FormData;
+  if (!headers.has("Content-Type") && !isFormData) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const response = await fetch(buildUrl(path), {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -52,6 +56,13 @@ export const apiClient = {
       method: "POST",
     });
   },
+  postForm<T>(path: string, body: FormData, options?: MutationOptions) {
+    return request<T>(path, {
+      ...options,
+      body,
+      method: "POST",
+    });
+  },
   patch<T>(path: string, body?: unknown, options?: MutationOptions) {
     return request<T>(path, {
       ...options,
@@ -67,3 +78,14 @@ export const apiClient = {
     });
   },
 };
+
+export function buildApiAssetUrl(path?: string | null) {
+  if (!path) {
+    return null;
+  }
+  if (path.startsWith("http") || path.startsWith("data:") || path.startsWith("blob:")) {
+    return path;
+  }
+
+  return buildUrl(path);
+}

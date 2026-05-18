@@ -9,12 +9,14 @@ import {
   SearchIcon,
   SparklesIcon,
 } from "@/components/icons";
+import { BottomNav } from "@/components/navigation/bottom-nav";
 import { getPersistedAuthToken } from "@/features/account/auth-session";
 import { deleteRoutine, reorderRoutines } from "../api";
 import type { RoutineOverview } from "../types";
 
 type RoutineScreenProps = {
   overview: RoutineOverview;
+  presentation?: "tab" | "stack";
 };
 
 const toneStyles = {
@@ -38,13 +40,23 @@ const buttonStyles = {
   disabled: "bg-slate-100 text-slate-400",
 } as const;
 
-export function RoutineScreen({ overview }: RoutineScreenProps) {
+export function RoutineScreen({
+  overview,
+  presentation = "tab",
+}: RoutineScreenProps) {
   const router = useRouter();
   const [routines, setRoutines] = useState(overview.routines);
   const [searchTerm, setSearchTerm] = useState("");
   const [manageMode, setManageMode] = useState(false);
   const [pendingAction, setPendingAction] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const showBottomNav = presentation === "tab";
+  const bottomPaddingClass = showBottomNav
+    ? manageMode
+      ? "pb-28"
+      : "pb-[220px]"
+    : "pb-40";
+  const createActionBottomClass = showBottomNav ? "bottom-[78px]" : "bottom-0";
 
   const normalizedSearchTerm = normalizeSearchText(searchTerm);
   const filteredRoutines = useMemo(() => {
@@ -148,20 +160,25 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-40">
+    <div className={`min-h-screen bg-slate-50 ${bottomPaddingClass}`}>
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
         <div className="relative mx-auto flex max-w-md items-center px-4 py-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            aria-label="뒤로가기"
-            className="inline-flex size-11 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
-          >
-            <ChevronLeftIcon className="size-5" />
-          </button>
+          {showBottomNav ? (
+            <div className="size-11" aria-hidden="true" />
+          ) : (
+            <button
+              type="button"
+              onClick={handleBack}
+              aria-label="뒤로가기"
+              className="inline-flex size-11 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+            >
+              <ChevronLeftIcon className="size-5" />
+            </button>
+          )}
           <h1 className="pointer-events-none absolute inset-x-0 text-center text-base font-bold text-slate-900">
             운동 루틴
           </h1>
+          <div className="ml-auto size-11" aria-hidden="true" />
         </div>
       </header>
 
@@ -317,19 +334,22 @@ export function RoutineScreen({ overview }: RoutineScreenProps) {
       </main>
 
       {!manageMode ? (
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20">
-        <div className="mx-auto max-w-md bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent px-4 pb-6 pt-10">
-          <button
-            type="button"
-            onClick={() => router.push("/routine-edit?mode=create")}
-            className="pointer-events-auto flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-600 py-4 text-sm font-bold text-white shadow-[0_8px_25px_rgba(79,70,229,0.3)] transition-transform active:scale-[0.97]"
-          >
-            <SparklesIcon className="size-4" />
-            <span>{overview.createActionLabel}</span>
-          </button>
+        <div
+          className={`pointer-events-none fixed inset-x-0 ${createActionBottomClass} z-20`}
+        >
+          <div className="mx-auto max-w-md bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent px-4 pb-6 pt-10">
+            <button
+              type="button"
+              onClick={() => router.push("/routine-edit?mode=create")}
+              className="pointer-events-auto flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-600 py-4 text-sm font-bold text-white shadow-[0_8px_25px_rgba(79,70,229,0.3)] transition-transform active:scale-[0.97]"
+            >
+              <SparklesIcon className="size-4" />
+              <span>{overview.createActionLabel}</span>
+            </button>
+          </div>
         </div>
-      </div>
       ) : null}
+      {showBottomNav ? <BottomNav current="routine" /> : null}
     </div>
   );
 }

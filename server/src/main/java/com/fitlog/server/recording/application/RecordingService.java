@@ -224,7 +224,7 @@ public class RecordingService {
 		WorkoutSession session = this.workoutSessionRepository.save(WorkoutSession.createCompleted(
 			userId,
 			LocalDate.now(SEOUL),
-			command.durationMinutes(),
+			normalizedDurationMinutes(command.durationMinutes(), command.exercises()),
 			command.caloriesBurned(),
 			command.intensity()
 		));
@@ -248,6 +248,22 @@ public class RecordingService {
 				));
 			}
 		}
+	}
+
+	private static int normalizedDurationMinutes(Integer requestedMinutes, List<WorkoutExerciseCommand> exercises) {
+		if (requestedMinutes != null && requestedMinutes > 0) {
+			return requestedMinutes;
+		}
+
+		int completedSetCount = exercises == null
+			? 0
+			: exercises.stream()
+				.flatMap(exercise -> exercise.sets().stream())
+				.filter(WorkoutSetCommand::completed)
+				.mapToInt(set -> 1)
+				.sum();
+
+		return completedSetCount > 0 ? completedSetCount : 0;
 	}
 
 	@Transactional

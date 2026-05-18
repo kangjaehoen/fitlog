@@ -1,10 +1,14 @@
 package com.fitlog.server.auth.application;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fitlog.server.goal.domain.Goal;
+import com.fitlog.server.goal.domain.GoalRepository;
 import com.fitlog.server.user.domain.SocialType;
 import com.fitlog.server.user.domain.User;
 import com.fitlog.server.user.domain.UserProfile;
@@ -14,17 +18,22 @@ import com.fitlog.server.user.domain.UserRepository;
 @Service
 public class AuthService {
 
+	private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
 	private final UserRepository userRepository;
 	private final UserProfileRepository userProfileRepository;
+	private final GoalRepository goalRepository;
 	private final AuthTokenService authTokenService;
 
 	public AuthService(
 		UserRepository userRepository,
 		UserProfileRepository userProfileRepository,
+		GoalRepository goalRepository,
 		AuthTokenService authTokenService
 	) {
 		this.userRepository = userRepository;
 		this.userProfileRepository = userProfileRepository;
+		this.goalRepository = goalRepository;
 		this.authTokenService = authTokenService;
 	}
 
@@ -36,10 +45,15 @@ public class AuthService {
 			.orElseGet(() -> this.userRepository.save(
 				User.createSocialUser(command.email(), command.socialType(), command.providerUserId())
 			));
+		if (!user.isActive()) {
+			throw new IllegalArgumentException("User is not active");
+		}
 
 		UserProfile profile = this.userProfileRepository
 			.findByUserId(user.getId())
 			.orElseGet(() -> this.userProfileRepository.save(UserProfile.create(user.getId(), command.nickname())));
+		this.goalRepository.findFirstByUserIdAndActiveTrueOrderByIdDesc(user.getId())
+			.orElseGet(() -> this.goalRepository.save(Goal.createDefault(user.getId(), LocalDate.now(SEOUL))));
 
 		AuthTokenService.IssuedToken token = this.authTokenService.issue(user.getId());
 

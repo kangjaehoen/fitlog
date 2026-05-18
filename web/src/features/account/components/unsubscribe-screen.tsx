@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckCircleIcon, InfoIcon } from "@/components/icons";
 import { StackHeader } from "@/components/navigation/stack-header";
+import { clearAuthSession, getPersistedAuthToken } from "../auth-session";
+import { withdrawAccount } from "../api";
 import type { UnsubscribeData } from "../types";
 
 type UnsubscribeScreenProps = {
@@ -13,13 +15,36 @@ type UnsubscribeScreenProps = {
 type ModalState = {
   message: string;
   confirmLabel?: string;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
 };
 
 export function UnsubscribeScreen({ data }: UnsubscribeScreenProps) {
   const router = useRouter();
   const [agreed, setAgreed] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [modal, setModal] = useState<ModalState | null>(null);
+
+  const handleWithdraw = async () => {
+    setWithdrawing(true);
+
+    try {
+      await withdrawAccount(getPersistedAuthToken());
+      clearAuthSession();
+      setModal({
+        message: data.successMessage,
+        onConfirm: () => router.push("/social-login"),
+      });
+    } catch (error) {
+      setModal({
+        message:
+          error instanceof Error && error.message === "AUTH_REQUIRED"
+            ? "로그인이 필요합니다. 다시 로그인한 뒤 탈퇴를 진행해 주세요."
+            : "탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+      });
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -72,13 +97,10 @@ export function UnsubscribeScreen({ data }: UnsubscribeScreenProps) {
               setModal({
                 message: data.confirmMessage,
                 confirmLabel: "탈퇴 진행",
-                onConfirm: () =>
-                  setModal({
-                    message: data.successMessage,
-                    onConfirm: () => router.push("/setting"),
-                  }),
+                onConfirm: handleWithdraw,
               });
             }}
+            disabled={withdrawing}
             className="h-12 rounded-2xl text-[14px] font-medium text-slate-400 transition hover:bg-red-50 hover:text-red-500"
           >
             {data.withdrawLabel}
@@ -107,7 +129,7 @@ export function UnsubscribeScreen({ data }: UnsubscribeScreenProps) {
                 type="button"
                 onClick={() => {
                   if (modal.onConfirm) {
-                    modal.onConfirm();
+                    void modal.onConfirm();
                     return;
                   }
 

@@ -63,4 +63,40 @@ public class Goal extends BaseTimeEntity {
 
 	@Column(name = "active", nullable = false)
 	private boolean active = true;
+
+	private Goal(
+		Long userId,
+		String title,
+		LocalDate startDate,
+		Integer dailyCalorieGoal,
+		BigDecimal dailyCarbGoalG,
+		BigDecimal dailyProteinGoalG,
+		BigDecimal dailyFatGoalG,
+		Integer weeklyWorkoutGoal,
+		boolean active
+	) {
+		this.userId = userId;
+		this.title = title;
+		this.startDate = startDate;
+		this.dailyCalorieGoal = dailyCalorieGoal;
+		this.dailyCarbGoalG = dailyCarbGoalG;
+		this.dailyProteinGoalG = dailyProteinGoalG;
+		this.dailyFatGoalG = dailyFatGoalG;
+		this.weeklyWorkoutGoal = weeklyWorkoutGoal;
+		this.active = active;
+	}
+
+	public static Goal createDefault(Long userId, LocalDate startDate) {
+		return new Goal(
+			userId,
+			"Default goal",
+			startDate,
+			2300,
+			new BigDecimal("280.00"),
+			new BigDecimal("160.00"),
+			new BigDecimal("70.00"),
+			5,
+			true
+		);
+	}
 }

@@ -106,18 +106,18 @@ public class AppContentService {
 		NutritionTotals todayNutrition = loadNutrition(todayMealLogs);
 		GoalTargets targets = this.goalRepository.findFirstByUserIdAndActiveTrueOrderByIdDesc(userId)
 			.map(GoalTargets::from)
-			.orElseGet(GoalTargets::empty);
+			.orElseGet(GoalTargets::defaults);
 		Optional<BodyMetric> latestBodyMetric = this.bodyMetricRepository
 			.findFirstByUserIdAndMeasuredOnLessThanEqualOrderByMeasuredOnDescIdDesc(userId, today);
 
 		// 목표 탄/단/지가 없으면 그래프가 항상 0%로 보이므로, "표시용"으로만 칼로리 목표 기반 추정치를 사용
 		GoalTargets displayTargets = targets.withDerivedMacroGoals();
 
-		int caloriePercent = percent(todayNutrition.calories(), targets.dailyCalorieGoal());
+		int caloriePercent = percent(todayNutrition.calories(), displayTargets.dailyCalorieGoal());
 		int carbPercent = percent(todayNutrition.carbG(), displayTargets.dailyCarbGoalG());
 		int proteinPercent = percent(todayNutrition.proteinG(), displayTargets.dailyProteinGoalG());
 		int fatPercent = percent(todayNutrition.fatG(), displayTargets.dailyFatGoalG());
-		int goalPercent = averageGoalPercent(targets, caloriePercent, carbPercent, proteinPercent, fatPercent);
+		int goalPercent = averageGoalPercent(displayTargets, caloriePercent, carbPercent, proteinPercent, fatPercent);
 
 		return new HomeDashboardResponse(
 			"\uC624\uB298 \uAE30\uB85D",
@@ -130,8 +130,8 @@ public class AppContentService {
 			goalPercent,
 			"\uBAA9\uD45C " + goalPercent + "% \uB2EC\uC131",
 			List.of(
-				new SummaryCardResponse("\uCE7C\uB85C\uB9AC", formatInteger(todayNutrition.calories()), formatIntegerTarget(targets.dailyCalorieGoal(), "kcal"), null),
-				new SummaryCardResponse("\uB2E8\uBC31\uC9C8", formatWholeNumber(todayNutrition.proteinG()), formatDecimalTarget(targets.dailyProteinGoalG(), "g"), null),
+				new SummaryCardResponse("\uCE7C\uB85C\uB9AC", formatInteger(todayNutrition.calories()), formatIntegerTarget(displayTargets.dailyCalorieGoal(), "kcal"), null),
+				new SummaryCardResponse("\uB2E8\uBC31\uC9C8", formatWholeNumber(todayNutrition.proteinG()), formatDecimalTarget(displayTargets.dailyProteinGoalG(), "g"), null),
 				new SummaryCardResponse("\uC6B4\uB3D9", workoutSummaryValue(todayWorkoutSessions), null, workoutSummaryStatus(todayWorkoutSessions)),
 				new SummaryCardResponse("\uCCB4\uC911", latestBodyMetric.map(BodyMetric::getWeightKg).map(AppContentService::formatDecimal).orElse("-"), "kg", null)
 			),
@@ -155,9 +155,9 @@ public class AppContentService {
 		LocalDate weekEnd = weekStart.plusDays(6);
 		User user = this.userRepository.findById(userId)
 			.orElseThrow(() -> new IllegalArgumentException("User not found"));
-		String displayName = this.userProfileRepository.findByUserId(userId)
-			.map(UserProfile::getNickname)
-			.orElse(user.getEmail());
+		Optional<UserProfile> profile = this.userProfileRepository.findByUserId(userId);
+		String displayName = profile.map(UserProfile::getNickname).orElse(user.getEmail());
+		String profileImageUrl = profile.map(UserProfile::getProfileImageUrl).orElse(null);
 		List<WorkoutSession> monthlySessions = completedSessions(
 			this.workoutSessionRepository.findByUserIdAndSessionDateBetween(userId, monthStart, today)
 		);
@@ -174,6 +174,7 @@ public class AppContentService {
 
 		return new ProfileScreenResponse(
 			displayName,
+			profileImageUrl,
 			startedDaysAgo(user, today),
 			"",
 			recordStreak(userId, today) + "일 연속",
@@ -642,6 +643,15 @@ public class AppContentService {
 			return new GoalTargets(null, null, null, null);
 		}
 
+		private static GoalTargets defaults() {
+			return new GoalTargets(
+				2300,
+				new BigDecimal("280.00"),
+				new BigDecimal("160.00"),
+				new BigDecimal("70.00")
+			);
+		}
+
 		private static boolean isMissingOrZero(BigDecimal value) {
 			return value == null || value.signum() <= 0;
 		}
@@ -672,6 +682,7 @@ public class AppContentService {
 
 	public record ProfileScreenResponse(
 		String displayName,
+		String profileImageUrl,
 		int startedDaysAgo,
 		String levelLabel,
 		String streakLabel,

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   CameraIcon,
   ChevronRightIcon,
@@ -12,13 +12,16 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { BottomNav } from "@/components/navigation/bottom-nav";
+import { buildApiAssetUrl } from "@/lib/api-client";
 import { getPersistedAuthToken, updatePersistedNickname } from "../auth-session";
-import { updateProfileNickname } from "../api";
+import { updateProfileImage, updateProfileNickname } from "../api";
 import type { ProfileScreenData } from "../types";
 
 type ProfileScreenProps = {
   profile: ProfileScreenData;
 };
+
+const MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function buildPath(points: number[]) {
   const max = Math.max(...points);
@@ -36,11 +39,17 @@ function buildPath(points: number[]) {
 
 export function ProfileScreen({ profile }: ProfileScreenProps) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState(profile.displayName);
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    profile.profileImageUrl ?? null,
+  );
   const [draftName, setDraftName] = useState(profile.displayName);
   const [editing, setEditing] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [currentMetricKey, setCurrentMetricKey] = useState(profile.metrics[0]?.key);
 
   const currentMetric = useMemo(
@@ -56,6 +65,43 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
 
   const dateLabels =
     currentMetric.dateLabels?.length ? currentMetric.dateLabels : ["오늘"];
+  const resolvedProfileImageUrl = buildApiAssetUrl(profileImageUrl);
+
+  const handleProfileImageChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const image = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!image) {
+      return;
+    }
+    if (!image.type.startsWith("image/")) {
+      setImageError("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    if (image.size > MAX_PROFILE_IMAGE_BYTES) {
+      setImageError("프로필 이미지는 5MB 이하로 업로드해 주세요.");
+      return;
+    }
+
+    setUploadingImage(true);
+    setImageError(null);
+
+    try {
+      const response = await updateProfileImage(image, getPersistedAuthToken());
+      setProfileImageUrl(response.profileImageUrl);
+      router.refresh();
+    } catch (error) {
+      setImageError(
+        error instanceof Error && error.message === "AUTH_REQUIRED"
+          ? "로그인이 필요합니다. 다시 로그인한 뒤 저장해 주세요."
+          : "프로필 이미지 업로드 중 문제가 발생했습니다.",
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleNicknameSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -107,11 +153,28 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
 
           <div className="flex items-start gap-4 pr-2">
             <div className="relative">
-              <div className="flex size-16 items-center justify-center rounded-[24px] border-2 border-white/40 bg-white/20">
-                <UserIcon className="size-8" />
+              <div className="flex size-16 items-center justify-center overflow-hidden rounded-[24px] border-2 border-white/40 bg-white/20">
+                {resolvedProfileImageUrl ? (
+                  <img
+                    src={resolvedProfileImageUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <UserIcon className="size-8" />
+                )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(event) => void handleProfileImageChange(event)}
+              />
               <button
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
                 className="absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full bg-white text-indigo-600 shadow-lg"
                 aria-label="프로필 사진"
               >
@@ -138,6 +201,11 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
               <p className="mt-1 mb-4 text-xs font-medium text-white/70">
                 운동 시작한 지 <span className="font-bold text-white">{profile.startedDaysAgo}일</span>째
               </p>
+              {imageError ? (
+                <p className="mb-3 text-xs font-semibold text-rose-100">
+                  {imageError}
+                </p>
+              ) : null}
             </div>
           </div>
 

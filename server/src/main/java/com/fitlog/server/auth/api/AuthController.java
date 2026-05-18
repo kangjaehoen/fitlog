@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fitlog.server.auth.application.AuthService;
+import com.fitlog.server.auth.application.GoogleOAuthException;
+import com.fitlog.server.auth.application.GoogleOAuthService;
 import com.fitlog.server.auth.application.KakaoOAuthException;
 import com.fitlog.server.auth.application.KakaoOAuthService;
 import com.fitlog.server.user.domain.SocialType;
@@ -27,20 +29,31 @@ public class AuthController {
 
 	private final AuthService authService;
 	private final KakaoOAuthService kakaoOAuthService;
+	private final GoogleOAuthService googleOAuthService;
 
-	public AuthController(AuthService authService, KakaoOAuthService kakaoOAuthService) {
+	public AuthController(
+		AuthService authService,
+		KakaoOAuthService kakaoOAuthService,
+		GoogleOAuthService googleOAuthService
+	) {
 		this.authService = authService;
 		this.kakaoOAuthService = kakaoOAuthService;
+		this.googleOAuthService = googleOAuthService;
 	}
 
 	@PostMapping("/login")
-	public AuthService.AuthResponse login(@Valid @RequestBody SocialLoginRequest request) {
-		return this.authService.login(new AuthService.SocialLoginCommand(
-			request.socialType(),
-			request.providerUserId().trim(),
-			request.email().trim(),
-			request.nickname().trim()
-		));
+	public ResponseEntity<AuthService.AuthResponse> login(@Valid @RequestBody SocialLoginRequest request) {
+		try {
+			return ResponseEntity.ok(this.authService.login(new AuthService.SocialLoginCommand(
+				request.socialType(),
+				request.providerUserId().trim(),
+				request.email().trim(),
+				request.nickname().trim()
+			)));
+		}
+		catch (IllegalArgumentException exception) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
 	}
 
 	@GetMapping("/kakao/authorize-url")
@@ -53,7 +66,22 @@ public class AuthController {
 		try {
 			return ResponseEntity.ok(this.kakaoOAuthService.login(request.code()));
 		}
-		catch (KakaoOAuthException exception) {
+		catch (KakaoOAuthException | IllegalArgumentException exception) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+	}
+
+	@GetMapping("/google/authorize-url")
+	public GoogleAuthorizeUrlResponse googleAuthorizeUrl() {
+		return new GoogleAuthorizeUrlResponse(this.googleOAuthService.getAuthorizationUrl());
+	}
+
+	@PostMapping("/google/callback")
+	public ResponseEntity<AuthService.AuthResponse> googleCallback(@Valid @RequestBody GoogleCallbackRequest request) {
+		try {
+			return ResponseEntity.ok(this.googleOAuthService.login(request.code()));
+		}
+		catch (GoogleOAuthException | IllegalArgumentException exception) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 	}
@@ -95,5 +123,11 @@ public class AuthController {
 	}
 
 	public record KakaoCallbackRequest(@NotBlank String code) {
+	}
+
+	public record GoogleAuthorizeUrlResponse(String authorizationUrl) {
+	}
+
+	public record GoogleCallbackRequest(@NotBlank String code) {
 	}
 }

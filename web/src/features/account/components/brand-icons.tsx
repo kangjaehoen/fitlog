@@ -72,15 +72,6 @@ function KakaoLogo(props: IconProps) {
   );
 }
 
-function AppleLogo(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M16.52 12.66c-.02-2.16 1.76-3.21 1.84-3.26-1.01-1.48-2.58-1.68-3.13-1.7-1.32-.14-2.6.79-3.27.79-.68 0-1.7-.77-2.82-.75-1.44.02-2.78.86-3.52 2.18-1.52 2.64-.39 6.52 1.07 8.65.73 1.04 1.57 2.2 2.68 2.16 1.08-.04 1.49-.69 2.8-.69 1.3 0 1.68.69 2.82.67 1.17-.02 1.9-1.05 2.6-2.1.84-1.19 1.17-2.37 1.18-2.43-.03-.01-2.23-.86-2.25-3.52Z" />
-      <path d="M14.37 6.3c.59-.74.99-1.73.88-2.73-.85.04-1.92.59-2.53 1.31-.54.63-1.03 1.66-.9 2.62.96.07 1.94-.49 2.55-1.2Z" />
-    </svg>
-  );
-}
-
 export function ProviderLogo({
   providerType,
   ...props
@@ -93,5 +84,5 @@ export function ProviderLogo({
     return <GoogleLogo {...props} />;
   }
 
-  return <AppleLogo {...props} />;
+  return null;
 }

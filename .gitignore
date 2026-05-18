@@ -39,6 +39,7 @@ Thumbs.db
 *.zip
 *.tar
 *.tar.gz
+server/uploads/
 
 # TypeScript
 *.tsbuildinfo

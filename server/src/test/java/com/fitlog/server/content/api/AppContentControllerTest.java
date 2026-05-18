@@ -1,6 +1,8 @@
 package com.fitlog.server.content.api;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.mock.web.MockMultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitlog.server.common.support.KoreanDateText;
@@ -43,6 +46,75 @@ class AppContentControllerTest {
 			.andExpect(jsonPath("$.summaryCards[0].label").value("\uCE7C\uB85C\uB9AC"))
 			.andExpect(jsonPath("$.nutritionProgress.length()").value(4))
 			.andExpect(jsonPath("$.workout.progressLabel").value("0/0 \uC644\uB8CC"));
+	}
+
+	@Test
+	void homeDashboardUsesDefaultGoalsForRecordedMeals() throws Exception {
+		String token = loginToken("home-dashboard-meal-progress");
+
+		this.mockMvc.perform(post("/api/records/meals")
+				.header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "mealType": "LUNCH",
+					  "foodName": "Chicken Rice",
+					  "quantity": 1.0,
+					  "quantityUnit": "SERVING",
+					  "caloriesKcal": 230,
+					  "carbG": 50.0,
+					  "proteinG": 25.0,
+					  "fatG": 10.0
+					}
+					"""))
+			.andExpect(status().isOk());
+
+		this.mockMvc.perform(get("/api/home/dashboard")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.summaryCards[0].subValue").value("/ 2,300 kcal"))
+			.andExpect(jsonPath("$.nutritionProgress[0].percent").value(10))
+			.andExpect(jsonPath("$.nutritionProgress[1].percent").value(18))
+			.andExpect(jsonPath("$.nutritionProgress[2].percent").value(16))
+			.andExpect(jsonPath("$.nutritionProgress[3].percent").value(14));
+	}
+
+	@Test
+	void zeroMinuteWorkoutUsesCompletedSetCountForDuration() throws Exception {
+		String token = loginToken("home-dashboard-workout-duration");
+
+		this.mockMvc.perform(post("/api/records/workouts")
+				.header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "durationMinutes": 0,
+					  "caloriesBurned": 110,
+					  "intensity": "MODERATE",
+					  "exercises": [
+					    {
+					      "name": "Bench Press",
+					      "sets": [
+					        { "weightKg": 60.0, "repetitions": 10, "completed": true },
+					        { "weightKg": 60.0, "repetitions": 8, "completed": true }
+					      ]
+					    }
+					  ]
+					}
+					"""))
+			.andExpect(status().isOk());
+
+		this.mockMvc.perform(get("/api/home/dashboard")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.workout.duration").value("2\uBD84"))
+			.andExpect(jsonPath("$.workout.calories").value("110 kcal"));
+
+		this.mockMvc.perform(get("/api/analytics/weekly")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.totalWorkout", containsString("2\uBD84")))
+			.andExpect(jsonPath("$.kpis[1].value").value("110 kcal"));
 	}
 
 	@Test
@@ -108,6 +180,59 @@ class AppContentControllerTest {
 				.header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.nickname").value("FitLog Strong"));
+	}
+
+	@Test
+	void profileImageCanBeUploaded() throws Exception {
+		String token = loginToken("profile-image");
+		MockMultipartFile image = new MockMultipartFile(
+			"image",
+			"profile.png",
+			"image/png",
+			new byte[] { 1, 2, 3, 4 }
+		);
+
+		MvcResult result = this.mockMvc.perform(multipart("/api/account/profile/image")
+				.file(image)
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.profileImageUrl").isString())
+			.andReturn();
+
+		String profileImageUrl = this.objectMapper.readTree(result.getResponse().getContentAsString())
+			.path("profileImageUrl")
+			.asText();
+
+		this.mockMvc.perform(get("/api/account/profile")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.profileImageUrl").value(profileImageUrl));
+	}
+
+	@Test
+	void accountWithdrawalSoftDeletesUserAndInvalidatesAccess() throws Exception {
+		String token = loginToken("account-withdrawal");
+
+		this.mockMvc.perform(post("/api/account/withdraw")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.ok").value(true));
+
+		this.mockMvc.perform(get("/api/auth/me")
+				.header("Authorization", "Bearer " + token))
+			.andExpect(status().isUnauthorized());
+
+		this.mockMvc.perform(post("/api/auth/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{
+					  "socialType": "KAKAO",
+					  "providerUserId": "fitlog-demo-account-withdrawal",
+					  "email": "kakao.account-withdrawal@fitlog.local",
+					  "nickname": "Kakao User"
+					}
+					"""))
+			.andExpect(status().isUnauthorized());
 	}
 
 	@Test

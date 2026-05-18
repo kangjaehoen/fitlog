@@ -72,4 +72,15 @@ class AuthControllerTest {
 			.andExpect(jsonPath("$.authorizationUrl", containsString("client_id=test-kakao-client-id")))
 			.andExpect(jsonPath("$.authorizationUrl", containsString("redirect_uri=http://localhost:3000/auth/kakao/callback")));
 	}
+
+	@Test
+	void googleAuthorizeUrlUsesConfiguredClientAndRedirectUri() throws Exception {
+		this.mockMvc.perform(get("/api/auth/google/authorize-url"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.authorizationUrl", containsString("https://accounts.google.com/o/oauth2/v2/auth")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("response_type=code")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("client_id=test-google-client-id")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("redirect_uri=http://localhost:3000/auth/google/callback")))
+			.andExpect(jsonPath("$.authorizationUrl", containsString("scope=openid%20email%20profile")));
+	}
 }

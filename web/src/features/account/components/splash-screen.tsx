@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getSocialLoginRedirectUrl, loginWithSocialProvider } from "../api";
-import { persistAuthSession } from "../auth-session";
+import { getSocialLoginRedirectUrl } from "../api";
 import type { SocialLoginData, SplashData } from "../types";
 import { FitLogMark, ProviderLogo } from "./brand-icons";
 
@@ -16,7 +14,6 @@ type SplashScreenProps = {
 const providerStyles = {
   kakao: "bg-[#FEE500] text-[#191919]",
   google: "border border-slate-200 bg-white text-slate-800",
-  apple: "bg-black text-white",
 } as const;
 
 export function SplashScreen({
@@ -24,7 +21,6 @@ export function SplashScreen({
   loginData,
   initialShowLogin = false,
 }: SplashScreenProps) {
-  const router = useRouter();
   const [showLogin, setShowLogin] = useState(initialShowLogin);
   const [loadingProvider, setLoadingProvider] = useState<
     SocialLoginData["options"][number]["providerType"] | null
@@ -51,14 +47,7 @@ export function SplashScreen({
 
     try {
       const redirectUrl = await getSocialLoginRedirectUrl(providerType);
-      if (redirectUrl) {
-        window.location.assign(redirectUrl);
-        return;
-      }
-
-      const response = await loginWithSocialProvider(providerType);
-      persistAuthSession(response);
-      router.push("/main");
+      window.location.assign(redirectUrl);
     } catch {
       setErrorMessage("로그인 서버에 연결할 수 없습니다.");
     } finally {
@@ -104,13 +93,7 @@ export function SplashScreen({
                   disabled={loadingProvider !== null}
                   className={`flex h-12 w-full items-center justify-center gap-3 rounded-[8px] text-sm font-bold transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${providerStyles[option.tone]}`}
                 >
-                  <span
-                    className={`flex size-6 items-center justify-center ${
-                      option.providerType === "APPLE"
-                        ? "text-white"
-                        : "text-[#191919]"
-                    }`}
-                  >
+                  <span className="flex size-6 items-center justify-center text-[#191919]">
                     <ProviderLogo
                       providerType={option.providerType}
                       className="size-5"
