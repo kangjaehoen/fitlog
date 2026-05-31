@@ -20,7 +20,7 @@ export function WeeklyAnalysisScreen({
   const weekLabel = formatWeekLabel(weekStart) || analysis.weekLabel;
 
   return (
-    <div className="pb-32">
+    <div className="min-h-screen bg-[#f8f8ff] pb-[112px]">
       <WeeklyAnalysisHeader
         weekLabel={weekLabel}
         dateRange={analysis.dateRange}
@@ -29,7 +29,7 @@ export function WeeklyAnalysisScreen({
         canViewNextWeek={canViewNextWeek}
       />
 
-      <main className="mx-auto flex max-w-md flex-col gap-4 px-4 py-4">
+      <main className="mx-auto flex w-full max-w-[390px] flex-col gap-3 px-4 pb-4 pt-3">
         <WeeklyWorkoutSection
           totalWorkout={analysis.totalWorkout}
           comparison={analysis.comparison}

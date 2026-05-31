@@ -17,10 +17,10 @@ export function HomeScreen({
   unreadNotificationCount,
 }: HomeScreenProps) {
   return (
-    <div className="min-h-screen pb-[132px]">
+    <div className="min-h-screen bg-[#f8f8ff] pb-[164px]">
       <HomeHeader hasUnreadNotifications={unreadNotificationCount > 0} />
 
-      <main className="mx-auto flex w-full max-w-[420px] flex-col gap-4 px-4 py-4">
+      <main className="mx-auto flex w-full max-w-[390px] flex-col gap-3 px-4 pb-4 pt-2">
         <RecordOverviewCard
           dateLabel={dashboard.dateLabel}
           recordChips={dashboard.recordChips}

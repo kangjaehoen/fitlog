@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import {
+  CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ShareIcon,
 } from "@/components/icons";
+import { FitLogMark } from "@/features/account/components/brand-icons";
 
 type WeeklyAnalysisHeaderProps = {
   weekLabel: string;
@@ -29,57 +31,53 @@ export function WeeklyAnalysisHeader({
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/70 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-md flex-col gap-4 px-5 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-indigo-500">
-              Weekly Review
-            </p>
-            <h1 className="text-2xl font-black text-slate-900">통계</h1>
+    <header className="mx-auto w-full max-w-[390px] px-4 pt-4">
+      <div className="rounded-[14px] border border-[#edf0ff] bg-white px-4 py-3.5 shadow-[0_10px_28px_rgba(37,45,100,0.08)]">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#f1efff] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-[#6653e9]">
+            <FitLogMark className="size-3" />
+            <span>Weekly Review</span>
           </div>
           <button
             type="button"
-            className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200"
-            aria-label="공유"
+            className="grid size-8 place-items-center rounded-full bg-[#f1efff] text-[#6653e9] transition hover:bg-violet-100"
+            aria-label="통계 공유"
           >
-            <ShareIcon className="size-5" />
+            <ShareIcon className="size-4" />
           </button>
         </div>
 
-        <div className="flex items-center justify-between rounded-[24px] border border-slate-100 bg-slate-50 px-3 py-3">
+        <div className="grid grid-cols-[32px_1fr_32px] items-center gap-1">
           <button
             type="button"
             onClick={() => navigateTo(previousWeekHref)}
-            className="rounded-2xl bg-white p-2.5 text-slate-500 shadow-sm"
+            className="grid size-8 place-items-center rounded-[10px] text-[#6653e9] transition hover:bg-[#f1efff]"
             aria-label="이전 주"
           >
-            <ChevronLeftIcon className="size-5" />
+            <ChevronLeftIcon className="size-5 stroke-[2.4]" />
           </button>
-          <div className="text-center">
-            <p className="text-lg font-black text-slate-900">{weekLabel}</p>
-            <p className="mt-1 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-semibold text-indigo-600">
-              {dateRange}
+
+          <div className="min-w-0 text-center">
+            <h1 className="truncate text-[22px] font-black leading-tight tracking-normal text-[#19144f]">
+              {weekLabel}
+            </h1>
+            <p className="mx-auto mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full bg-[#f1efff] px-3 py-1.5 text-[10px] font-black text-[#6653e9]">
+              <CalendarIcon className="size-3.5 shrink-0" />
+              <span className="truncate">{dateRange}</span>
             </p>
           </div>
+
           {canViewNextWeek ? (
             <button
               type="button"
               onClick={() => navigateTo(nextWeekHref)}
-              className="rounded-2xl bg-white p-2.5 text-slate-500 shadow-sm"
+              className="grid size-8 place-items-center rounded-[10px] text-[#6653e9] transition hover:bg-[#f1efff]"
               aria-label="다음 주"
             >
-              <ChevronRightIcon className="size-5" />
+              <ChevronRightIcon className="size-5 stroke-[2.4]" />
             </button>
           ) : (
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-2xl bg-slate-100 p-2.5 text-slate-300"
-              aria-label="다음 주"
-            >
-              <ChevronRightIcon className="size-5" />
-            </button>
+            <span aria-hidden="true" className="size-8" />
           )}
         </div>
       </div>

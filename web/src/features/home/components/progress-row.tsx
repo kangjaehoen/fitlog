@@ -5,10 +5,10 @@ type ProgressRowProps = {
 };
 
 const COLOR_BY_CLASS: Record<string, string> = {
-  "bg-[#f6bcc8]": "#f4a3ad",
-  "bg-[#b1a6fb]": "#6f35d9",
-  "bg-[#8fd5ad]": "#2f9a55",
-  "bg-[#95d9e4]": "#27b8bd",
+  "bg-[#f6bcc8]": "#f27b94",
+  "bg-[#b1a6fb]": "#8666ef",
+  "bg-[#8fd5ad]": "#65bd77",
+  "bg-[#95d9e4]": "#4fc0cf",
 };
 
 function progressColor(colorClass: string) {
@@ -33,10 +33,15 @@ export function ProgressRow({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between text-[12px] leading-none">
-        <span className="font-semibold text-slate-950">{label}</span>
-        <span className="font-medium text-slate-800">{safePercent}%</span>
+        <span className="font-bold text-[#4b5068]">{label}</span>
+        <span
+          className="font-black"
+          style={{ color: progressColor(colorClass) }}
+        >
+          {safePercent}%
+        </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-white">
+      <div className="h-2 overflow-hidden rounded-full bg-[#f0f1f8]">
         <div
           className="h-full rounded-full"
           style={{

@@ -54,6 +54,62 @@ export function SearchIcon({ className }: IconProps) {
   );
 }
 
+export function SunIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2" />
+      <path d="M12 19.5v2" />
+      <path d="m4.6 4.6 1.4 1.4" />
+      <path d="m18 18 1.4 1.4" />
+      <path d="M2.5 12h2" />
+      <path d="M19.5 12h2" />
+      <path d="m4.6 19.4 1.4-1.4" />
+      <path d="m18 6 1.4-1.4" />
+    </IconBase>
+  );
+}
+
+export function NoonIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 4v2" />
+      <path d="M12 18v2" />
+      <path d="M4 12h2" />
+      <path d="M18 12h2" />
+    </IconBase>
+  );
+}
+
+export function MoonIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M20 14.6A7.2 7.2 0 0 1 9.4 4a8 8 0 1 0 10.6 10.6Z" />
+    </IconBase>
+  );
+}
+
+export function CupcakeIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M8 10.5a4 4 0 0 1 8 0" />
+      <path d="M6.5 11.5h11" />
+      <path d="m8 11.5 1.2 8h5.6l1.2-8" />
+      <path d="M10 15.5h4" />
+      <path d="M12 5.5V4" />
+    </IconBase>
+  );
+}
+
+export function MinusIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M5 12h14" />
+    </IconBase>
+  );
+}
+
 export function HomeIcon({ className }: IconProps) {
   return (
     <IconBase className={className}>
@@ -172,6 +228,34 @@ export function SparklesIcon({ className }: IconProps) {
       <path d="m12 3 1.1 3.4L16.5 7.5l-3.4 1.1L12 12l-1.1-3.4L7.5 7.5l3.4-1.1L12 3Z" />
       <path d="m18 13 .6 1.8 1.9.6-1.9.6L18 18l-.6-1.9-1.9-.6 1.9-.6L18 13Z" />
       <path d="m6 14 .8 2.2L9 17l-2.2.8L6 20l-.8-2.2L3 17l2.2-.8L6 14Z" />
+    </IconBase>
+  );
+}
+
+export function TrendingUpIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="m3 17 6-6 4 4 7-7" />
+      <path d="M14 8h6v6" />
+    </IconBase>
+  );
+}
+
+export function PieChartIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M12 3v9h9" />
+      <path d="M19.1 16.6A8 8 0 1 1 9.4 4.9" />
+      <path d="M14 3.3A8 8 0 0 1 20.7 10H14Z" />
+    </IconBase>
+  );
+}
+
+export function LeafIcon({ className }: IconProps) {
+  return (
+    <IconBase className={className}>
+      <path d="M19 4c-7.8 0-12 4.2-12 10a5 5 0 0 0 5 5c5.8 0 10-4.2 10-12V4h-3Z" />
+      <path d="M7 19c2.4-4.4 5.3-7.3 9-9" />
     </IconBase>
   );
 }

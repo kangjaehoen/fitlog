@@ -6,9 +6,13 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useMemo, useRef, useState } from "react";
 import {
   CameraIcon,
+  ChartIcon,
   ChevronRightIcon,
   PencilIcon,
+  PlusIcon,
   SettingsIcon,
+  SparklesIcon,
+  TrendingUpIcon,
   UserIcon,
 } from "@/components/icons";
 import { BottomNav } from "@/components/navigation/bottom-nav";
@@ -35,6 +39,57 @@ function buildPath(points: number[]) {
       return `${index === 0 ? "M" : "L"} ${x} ${y}`;
     })
     .join(" ");
+}
+
+function ProfileLogoMark() {
+  return (
+    <div className="pointer-events-none absolute right-0 top-10 size-[116px] opacity-75">
+      <div className="absolute inset-0 rounded-[28px] bg-white/8" />
+      <div className="absolute inset-3 rotate-[-10deg] rounded-[22px] bg-white/12 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]" />
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 96 96"
+        className="absolute right-4 top-4 size-[78px] rotate-[-10deg]"
+      >
+        <defs>
+          <linearGradient id="profile-logo-card" x1="21" y1="17" x2="77" y2="82">
+            <stop stopColor="#baadff" />
+            <stop offset="1" stopColor="#7564ef" />
+          </linearGradient>
+          <linearGradient id="profile-logo-avatar" x1="34" y1="25" x2="60" y2="61">
+            <stop stopColor="#efeaff" />
+            <stop offset="1" stopColor="#cfc6ff" />
+          </linearGradient>
+        </defs>
+        <rect
+          x="23"
+          y="18"
+          width="51"
+          height="60"
+          rx="15"
+          fill="url(#profile-logo-card)"
+          opacity="0.95"
+        />
+        <circle cx="48.5" cy="35.5" r="10.5" fill="url(#profile-logo-avatar)" />
+        <path
+          d="M33.5 59.5c2.4-8.1 8.1-12.2 15-12.2s12.6 4.1 15 12.2"
+          fill="#d8d1ff"
+          opacity="0.92"
+        />
+        <rect x="34" y="64" width="19" height="4.5" rx="2.25" fill="#5f4be2" opacity="0.56" />
+        <rect x="57" y="64" width="8" height="4.5" rx="2.25" fill="#5f4be2" opacity="0.32" />
+        <circle cx="66" cy="27" r="3.2" fill="#ded8ff" opacity="0.86" />
+        <circle cx="70.5" cy="35.5" r="2.4" fill="#ded8ff" opacity="0.58" />
+        <path
+          d="M35 73h27"
+          stroke="#ded8ff"
+          strokeWidth="4"
+          strokeLinecap="round"
+          opacity="0.68"
+        />
+      </svg>
+    </div>
+  );
 }
 
 export function ProfileScreen({ profile }: ProfileScreenProps) {
@@ -136,11 +191,17 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-32">
-      <header className="relative bg-[linear-gradient(135deg,#4338ca_0%,#7c3aed_100%)] px-5 pt-6 pb-10 text-white">
-        <div className="absolute -top-12 -left-10 size-40 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-20 right-0 size-48 rounded-full bg-fuchsia-300/10 blur-3xl" />
+    <div className="min-h-screen bg-[#f8f8ff] pb-32">
+      <header
+        className="relative px-5 pb-10 pt-6 text-white shadow-[0_14px_28px_rgba(96,72,220,0.22)]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 82% 34%, rgba(255,255,255,0.20), transparent 30%), linear-gradient(135deg, #8374f6 0%, #6651e8 48%, #5941d9 100%)",
+        }}
+      >
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.16)_0%,transparent_42%)]" />
         <div className="relative mx-auto max-w-md">
+          <ProfileLogoMark />
           <div className="mb-5 flex justify-end">
             <Link
               href="/setting"
@@ -151,7 +212,7 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
             </Link>
           </div>
 
-          <div className="flex items-start gap-4 pr-2">
+          <div className="relative flex items-start gap-4 pr-20">
             <div className="relative">
               <div className="flex size-16 items-center justify-center overflow-hidden rounded-[24px] border-2 border-white/40 bg-white/20">
                 {resolvedProfileImageUrl ? (
@@ -209,205 +270,245 @@ export function ProfileScreen({ profile }: ProfileScreenProps) {
             </div>
           </div>
 
-          <section className="absolute inset-x-4 -bottom-20 grid grid-cols-3 rounded-[28px] border border-slate-50 bg-white px-4 py-4 text-slate-900 shadow-xl shadow-indigo-950/10">
+          <section className="absolute inset-x-4 -bottom-20 grid grid-cols-3 rounded-[14px] border border-[#edf0ff] bg-white px-4 py-4 text-[#22243d] shadow-[0_10px_28px_rgba(37,45,100,0.08)]">
             {profile.summaryStats.map((stat, index) => (
               <div
                 key={stat.label}
-                className={`text-center ${index < profile.summaryStats.length - 1 ? "border-r border-slate-100" : ""}`}
+                className={`text-center ${index < profile.summaryStats.length - 1 ? "border-r border-[#eef0f8]" : ""}`}
               >
                 <p className="text-[10px] font-bold uppercase text-slate-400">
                   {stat.label}
                 </p>
-                <p className="mt-1 text-lg font-black text-slate-800">{stat.value}</p>
+                <p className="mt-1 text-lg font-black text-[#22243d]">{stat.value}</p>
               </div>
             ))}
           </section>
         </div>
       </header>
 
-      <main className="mx-auto mt-16 flex max-w-md flex-col gap-6 px-5">
-        <section className="rounded-[28px] border border-slate-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800">목표 달성 현황</h2>
-            <span className="text-[11px] font-bold text-indigo-600">
+      <main className="mx-auto mt-16 flex w-full max-w-[390px] flex-col gap-3 px-4 pb-4">
+        <section className="rounded-[14px] border border-[#edf0ff] bg-white px-4 py-3.5 shadow-[0_10px_28px_rgba(37,45,100,0.08)]">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="inline-flex min-w-0 items-center gap-1.5">
+              <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#7563f1] text-white">
+                <SparklesIcon className="size-3.5" />
+              </span>
+              <h2 className="min-w-0 truncate text-[13px] font-black leading-none text-[#22243d]">
+                목표 달성 현황
+              </h2>
+            </div>
+            <span className="shrink-0 rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black leading-none text-[#6653e9]">
               {profile.goal.label}
             </span>
           </div>
-          <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-indigo-500"
-              style={{ width: `${profile.goal.percent}%` }}
-            />
+
+          <div className="rounded-[10px] border border-[#eef0f8] bg-[#faf9ff] px-3 py-3 shadow-[0_8px_20px_rgba(45,50,92,0.04)]">
+            <div className="flex items-end justify-between gap-3">
+              <p className="text-[12px] font-bold text-slate-500">현재 진행률</p>
+              <p className="text-[19px] font-black leading-none text-[#6653e9]">
+                {profile.goal.percent}%
+              </p>
+            </div>
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[#ebe9f8]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(135deg,#e879c6_0%,#8b5cf6_52%,#6653e9_100%)] shadow-[0_8px_18px_rgba(102,83,233,0.24)]"
+                style={{ width: `${Math.min(100, Math.max(0, profile.goal.percent))}%` }}
+              />
+            </div>
+            <p className="mt-3 text-[12px] font-medium leading-relaxed text-[#22243d]">
+              {profile.goal.helper}
+            </p>
           </div>
-          <p className="mt-3 text-[11px] leading-5 text-slate-400">
-            {profile.goal.helper}
-          </p>
+
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {[
+              { label: "레벨", value: profile.levelLabel },
+              { label: "연속 기록", value: profile.streakLabel },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[10px] border border-[#eef0f8] bg-white px-3 py-2.5 shadow-[0_8px_20px_rgba(45,50,92,0.04)]"
+              >
+                <p className="text-[10px] font-bold text-slate-400">
+                  {item.label}
+                </p>
+                <p className="mt-1 truncate text-[13px] font-black text-[#22243d]">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
         </section>
 
-        <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
-              신체 지표 변화
-            </h2>
-            <span className="text-[10px] font-medium text-slate-300">
-              최근 5회 기록
+        <section className="rounded-[14px] border border-[#edf0ff] bg-white px-4 py-3.5 shadow-[0_10px_28px_rgba(37,45,100,0.08)]">
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <div className="inline-flex min-w-0 flex-1 items-center gap-1.5">
+              <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#7563f1] text-white">
+                <ChartIcon className="size-3.5" />
+              </span>
+              <h2 className="min-w-0 truncate text-[13px] font-black leading-none text-[#22243d]">
+                신체 지표 변화
+              </h2>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black leading-none text-[#6653e9]">
+              <TrendingUpIcon className="size-3.5" />
+              최근 5회
             </span>
           </div>
 
-          <div className="space-y-6 rounded-[30px] border border-slate-100 bg-white p-6 shadow-sm">
-            <div>
-              <div className="mb-5 flex items-center justify-between">
-                <span
-                  className="rounded-full px-3 py-1 text-[10px] font-black"
-                  style={{
-                    color: currentMetric.color,
-                    backgroundColor: `${currentMetric.color}12`,
-                  }}
-                >
-                  {currentMetric.label}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  현재 {currentMetric.value}
-                  {currentMetric.unit}
-                </span>
-              </div>
-
-              <div className="relative h-36">
-                <div className="absolute inset-0 flex flex-col justify-between opacity-50">
-                  <div className="border-t border-slate-100" />
-                  <div className="border-t border-slate-100" />
-                  <div className="border-t border-slate-100" />
-                </div>
-
-                <svg viewBox="0 0 100 100" className="relative h-full w-full overflow-visible">
-                  <path
-                    d={buildPath(currentMetric.series)}
-                    fill="none"
-                    stroke={currentMetric.color}
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  {currentMetric.series.map((point, index) => {
-                    const max = Math.max(...currentMetric.series);
-                    const min = Math.min(...currentMetric.series);
-                    const range = max - min || 1;
-                    const x = (index / (currentMetric.series.length - 1 || 1)) * 100;
-                    const y = 90 - ((point - min) / range) * 60;
-                    const active = index === currentMetric.series.length - 1;
-
-                    return (
-                      <circle
-                        key={`${currentMetric.key}-${index}`}
-                        cx={x}
-                        cy={y}
-                        r={active ? 4.5 : 3.5}
-                        fill={active ? currentMetric.color : "white"}
-                        stroke={currentMetric.color}
-                        strokeWidth="1.8"
-                      />
-                    );
-                  })}
-                </svg>
-              </div>
-
-              <div
-                className="mt-4 grid text-center text-[9px] font-bold text-slate-300"
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <span
+                className="rounded-full px-2.5 py-1 text-[10px] font-black leading-none"
                 style={{
-                  gridTemplateColumns: `repeat(${dateLabels.length}, minmax(0, 1fr))`,
+                  color: currentMetric.color,
+                  backgroundColor: `${currentMetric.color}14`,
                 }}
               >
-                {dateLabels.map((label, index) => (
-                  <span
-                    key={`${currentMetric.key}-${label}-${index}`}
-                    style={
-                      index === dateLabels.length - 1
-                        ? { color: currentMetric.color }
-                        : undefined
-                    }
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {profile.metrics.map((metric) => {
-                const active = metric.key === currentMetric.key;
-                const deltaTone =
-                  metric.deltaDirection === "up"
-                    ? "text-emerald-500"
-                    : "text-rose-500";
-
-                return (
-                  <button
-                    key={metric.key}
-                    type="button"
-                    onClick={() => setCurrentMetricKey(metric.key)}
-                    className={`rounded-2xl border p-3 text-center transition ${
-                      active
-                        ? "border-transparent text-white shadow-xl"
-                        : "border-slate-100 bg-white"
-                    }`}
-                    style={active ? { backgroundColor: metric.color } : undefined}
-                  >
-                    <p
-                      className={`text-[9px] font-bold ${
-                        active ? "text-white" : "text-slate-400"
-                      }`}
-                    >
-                      {metric.label}
-                    </p>
-                    <p
-                      className={`mt-1 text-sm font-black ${
-                        active ? "text-white" : "text-slate-800"
-                      }`}
-                    >
-                      {metric.value}
-                      <span className="ml-1 text-[8px] font-normal">
-                        {metric.unit}
-                      </span>
-                    </p>
-                    <p
-                      className={`mt-1 text-[10px] font-bold ${
-                        active ? "text-white" : deltaTone
-                      }`}
-                    >
-                      {metric.delta}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            <Link
-              href="/body-info"
-              className="flex items-center justify-center gap-3 rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-lg shadow-slate-200 transition hover:bg-slate-800"
-            >
-              <span className="text-white">+</span>
-              <span className="text-white">
-              새 신체 데이터 기록
+                {currentMetric.label}
               </span>
-            </Link>
+              <span className="text-[12px] font-bold text-slate-500">
+                현재{" "}
+                <span className="font-black text-[#22243d]">
+                  {currentMetric.value}
+                  {currentMetric.unit}
+                </span>
+              </span>
+            </div>
+
+            <div className="relative h-[152px] rounded-[10px] border border-[#eef0f8] bg-[#faf9ff] px-3 py-4 shadow-[0_8px_20px_rgba(45,50,92,0.04)]">
+              <div className="absolute inset-x-3 top-6 bottom-9 flex flex-col justify-between">
+                <div className="border-t border-dashed border-violet-100" />
+                <div className="border-t border-dashed border-violet-100" />
+                <div className="border-t border-dashed border-violet-100" />
+              </div>
+
+              <svg viewBox="0 0 100 100" className="relative h-full w-full overflow-visible">
+                <path
+                  d={buildPath(currentMetric.series)}
+                  fill="none"
+                  stroke={currentMetric.color}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {currentMetric.series.map((point, index) => {
+                  const max = Math.max(...currentMetric.series);
+                  const min = Math.min(...currentMetric.series);
+                  const range = max - min || 1;
+                  const x = (index / (currentMetric.series.length - 1 || 1)) * 100;
+                  const y = 90 - ((point - min) / range) * 60;
+                  const active = index === currentMetric.series.length - 1;
+
+                  return (
+                    <circle
+                      key={`${currentMetric.key}-${index}`}
+                      cx={x}
+                      cy={y}
+                      r={active ? 4.5 : 3.5}
+                      fill={active ? currentMetric.color : "white"}
+                      stroke={currentMetric.color}
+                      strokeWidth="1.8"
+                    />
+                  );
+                })}
+              </svg>
+            </div>
+
+            <div
+              className="mt-2 grid text-center text-[9px] font-bold text-slate-300"
+              style={{
+                gridTemplateColumns: `repeat(${dateLabels.length}, minmax(0, 1fr))`,
+              }}
+            >
+              {dateLabels.map((label, index) => (
+                <span
+                  key={`${currentMetric.key}-${label}-${index}`}
+                  style={
+                    index === dateLabels.length - 1
+                      ? { color: currentMetric.color }
+                      : undefined
+                  }
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {profile.metrics.map((metric) => {
+              const active = metric.key === currentMetric.key;
+              const deltaTone =
+                metric.deltaDirection === "up"
+                  ? "text-emerald-500"
+                  : "text-rose-500";
+
+              return (
+                <button
+                  key={metric.key}
+                  type="button"
+                  onClick={() => setCurrentMetricKey(metric.key)}
+                  className={`min-h-[83px] rounded-[10px] border px-2 py-2.5 text-center shadow-[0_8px_20px_rgba(45,50,92,0.04)] transition ${
+                    active
+                      ? "border-transparent text-white shadow-[0_10px_22px_rgba(102,83,233,0.20)]"
+                      : "border-[#eef0f8] bg-white"
+                  }`}
+                  style={active ? { backgroundColor: metric.color } : undefined}
+                >
+                  <p
+                    className={`text-[10px] font-bold ${
+                      active ? "text-white/85" : "text-slate-400"
+                    }`}
+                  >
+                    {metric.label}
+                  </p>
+                  <p
+                    className={`mt-2 text-[15px] font-black leading-none ${
+                      active ? "text-white" : "text-[#22243d]"
+                    }`}
+                  >
+                    {metric.value}
+                    <span className="ml-1 text-[8px] font-bold">
+                      {metric.unit}
+                    </span>
+                  </p>
+                  <p
+                    className={`mt-2 text-[10px] font-black ${
+                      active ? "text-white" : deltaTone
+                    }`}
+                  >
+                    {metric.delta}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <Link
+            href="/body-info"
+            className="mt-3 flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#8876fb,#6150dc)] px-4 text-[13px] font-black text-white shadow-[0_12px_22px_rgba(97,80,220,0.24)] transition hover:-translate-y-0.5"
+          >
+            <PlusIcon className="size-4" />
+            <span>새 신체 데이터 기록</span>
+          </Link>
         </section>
 
-        <section className="hidden rounded-[28px] border border-slate-100 bg-white shadow-sm">
-          <div className="border-b border-slate-50 bg-slate-50/60 px-5 py-4">
+        <section className="hidden rounded-[14px] border border-[#edf0ff] bg-white shadow-[0_10px_28px_rgba(37,45,100,0.08)]">
+          <div className="border-b border-[#eef0f8] bg-[#faf9ff] px-5 py-4">
             <h2 className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
               빠른 이동
             </h2>
           </div>
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-[#eef0f8]">
             {profile.shortcuts.map((shortcut) => (
               <Link
                 key={shortcut.href}
                 href={shortcut.href}
-                className="flex items-center justify-between px-5 py-4 transition hover:bg-slate-50"
+                className="flex items-center justify-between px-5 py-4 transition hover:bg-[#f8f8ff]"
               >
                 <div>
-                  <p className="text-sm font-bold text-slate-700">{shortcut.label}</p>
+                  <p className="text-sm font-bold text-[#22243d]">{shortcut.label}</p>
                   <p className="mt-1 text-[11px] text-slate-400">
                     {shortcut.description}
                   </p>
