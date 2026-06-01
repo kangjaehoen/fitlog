@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
   BellIcon,
@@ -84,11 +85,54 @@ type ReminderPreferences = {
   workoutReminderTimes: WorkoutReminderTime[];
 };
 
+const surfaceCardClass =
+  "rounded-[14px] border border-[#edf0ff] bg-white shadow-[0_10px_28px_rgba(37,45,100,0.08)]";
+const innerPanelClass =
+  "rounded-[10px] border border-[#eef0f8] bg-[#faf9ff] shadow-[0_8px_20px_rgba(45,50,92,0.04)]";
+
 function SectionTitle({ children }: { children: string }) {
   return (
-    <h2 className="ml-1 text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+    <h2 className="px-0.5 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
       {children}
     </h2>
+  );
+}
+
+function SectionHeading({
+  children,
+  description,
+  icon,
+}: {
+  children: string;
+  description?: string;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="inline-flex min-w-0 items-start gap-2">
+        <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-[#7563f1] text-white">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-[13px] font-black leading-none text-[#22243d]">
+            {children}
+          </h3>
+          {description ? (
+            <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-400">
+              {description}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsHeroMark() {
+  return (
+    <div className="pointer-events-none absolute -right-5 top-4 grid size-[104px] rotate-[-14deg] place-items-center rounded-[24px] border border-white/15 bg-white/10 text-white/45 shadow-inner">
+      <BellIcon className="size-12" />
+    </div>
   );
 }
 
@@ -746,66 +790,67 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
     }
   }
 
+  const activeMealReminderCount = mealReminderTimes.filter(
+    (reminder) => reminder.enabled,
+  ).length;
+  const activeWorkoutReminderCount = workoutReminderTimes.filter(
+    (reminder) => reminder.enabled && reminder.activeDays.length > 0,
+  ).length;
+  const enabledReminderCount =
+    (notificationMap.meal ? activeMealReminderCount : 0) +
+    (notificationMap.workout ? activeWorkoutReminderCount : 0);
+  const pushStateLabel =
+    permissionStatus === "subscribed"
+      ? "연결됨"
+      : pushAgreed
+        ? "사용 중"
+        : "꺼짐";
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f8f8ff]">
       <StackHeader title="설정" fallbackHref="/mypage" />
 
-      <main className="mx-auto flex max-w-md flex-col gap-6 px-5 py-6 pb-10">
-        <section className="space-y-2">
-          <SectionTitle>계정 정보</SectionTitle>
-          <div className="overflow-hidden rounded-[28px] border border-slate-100 bg-white shadow-sm">
-            {settings.accountActions.map((action) => {
-              const content = (
-                <div className="flex items-center justify-between px-5 py-4 transition hover:bg-slate-50">
-                  <div
-                    className={`flex items-center gap-3 ${
-                      action.tone === "danger" ? "text-rose-500" : "text-slate-700"
-                    }`}
-                  >
-                    <LogOutIcon className="size-5" />
-                    <span className="text-sm font-medium">{action.label}</span>
-                  </div>
-                  <ChevronRightIcon className="size-4 text-slate-300" />
-                </div>
-              );
+      <main className="mx-auto flex w-full max-w-[390px] flex-col gap-3 px-4 pb-10 pt-3">
+        <section className="relative overflow-hidden rounded-[14px] px-5 py-[18px] text-white shadow-[0_14px_28px_rgba(96,72,220,0.26)] [background-image:radial-gradient(circle_at_82%_25%,rgba(255,255,255,0.24),transparent_28%),linear-gradient(135deg,#8374f6_0%,#6651e8_48%,#5941d9_100%)]">
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.16)_0%,transparent_42%)]" />
+          <SettingsHeroMark />
 
-              if (action.href) {
-                return (
-                  <Link key={action.label} href={action.href}>
-                    {content}
-                  </Link>
-                );
-              }
+          <div className="relative max-w-[250px]">
+            <p className="text-[11px] font-black leading-none tracking-[0.22em] text-white/75">
+              SETTINGS
+            </p>
+            <h2 className="mt-2 text-[22px] font-black leading-tight">
+              내 기록 흐름을 맞춰요
+            </h2>
+            <p className="mt-2 text-[12px] font-semibold leading-5 text-white/80">
+              알림, 리마인더, 계정 정보를 한 화면에서 빠르게 관리하세요.
+            </p>
+          </div>
 
-              return (
-                <button
-                  key={action.label}
-                  type="button"
-                  className="w-full text-left disabled:cursor-wait disabled:opacity-70"
-                  disabled={isLoggingOut}
-                  onClick={action.action === "logout" ? handleLogout : undefined}
-                >
-                  {content}
-                </button>
-              );
-            })}
+          <div className="relative mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex h-8 items-center rounded-full bg-white px-3 text-[11px] font-black text-[#5e48e7] shadow-[0_10px_20px_rgba(42,31,124,0.14)]">
+              푸시 {pushStateLabel}
+            </span>
+            <span className="inline-flex h-8 items-center rounded-full bg-white/16 px-3 text-[11px] font-black text-white">
+              리마인더 {enabledReminderCount}개
+            </span>
           </div>
         </section>
 
-        <section className="space-y-3">
-          <SectionTitle>알림 발송 여부</SectionTitle>
-          <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex gap-3">
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                  <BellIcon className="size-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-black text-slate-800">
+        <section className="space-y-2">
+          <SectionTitle>알림</SectionTitle>
+          <div className={`${surfaceCardClass} px-4 py-3.5`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="inline-flex min-w-0 items-start gap-2">
+                <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-[#7563f1] text-white">
+                  <BellIcon className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-[13px] font-black leading-none text-[#22243d]">
                     푸시 알림 발송 동의
-                  </p>
-                  <p className="mt-1 text-[11px] leading-5 text-slate-400">
-                    운동과 식단 리마인더를 브라우저 알림으로 받을 수 있어요.
+                  </h3>
+                  <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-400">
+                    운동과 식단 리마인더를 브라우저 알림으로 받아요.
                   </p>
                 </div>
               </div>
@@ -817,37 +862,36 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
               />
             </div>
             <p
-              className={`mt-4 rounded-2xl px-4 py-3 text-[11px] font-bold leading-5 ${
+              className={`mt-3 rounded-[10px] px-3 py-2.5 text-[11px] font-bold leading-5 ${
                 permissionStatus === "error" || permissionStatus === "denied"
                   ? "bg-rose-50 text-rose-500"
                   : permissionStatus === "subscribed"
                     ? "bg-emerald-50 text-emerald-600"
-                    : "bg-slate-50 text-slate-500"
+                    : "bg-[#faf9ff] text-slate-500"
               }`}
               role="status"
             >
               {pushMessage}
             </p>
           </div>
-
         </section>
 
         {pushAgreed ? (
           <>
-            <section className="space-y-3">
-              <SectionTitle>리마인더 설정</SectionTitle>
+            <section className="space-y-2">
+              <SectionTitle>리마인더</SectionTitle>
 
-              <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                      <UtensilsIcon className="size-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-800">
+              <div className={`${surfaceCardClass} px-4 py-3.5`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="inline-flex min-w-0 items-start gap-2">
+                    <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                      <UtensilsIcon className="size-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-[13px] font-black leading-none text-[#22243d]">
                         {mealNotification?.title ?? "식단 기록 리마인더"}
-                      </p>
-                      <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                      </h3>
+                      <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-400">
                         {mealNotification?.description ??
                           "식사별 기록 시간을 따로 설정할 수 있어요."}
                       </p>
@@ -861,13 +905,13 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                 </div>
 
                 {notificationMap.meal ? (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+                  <div className="mt-4 grid gap-2 border-t border-[#eef0f8] pt-3">
                     {mealReminderTimes.map((reminder) => (
                       <div
                         key={reminder.id}
-                        className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3"
+                        className={`${innerPanelClass} flex min-h-[50px] items-center gap-2 px-3 py-2.5`}
                       >
-                        <span className="min-w-[58px] text-sm font-bold text-slate-700">
+                        <span className="w-[52px] shrink-0 truncate text-[12px] font-black text-[#22243d]">
                           {reminder.label}
                         </span>
                         <input
@@ -879,7 +923,7 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                               time: event.target.value,
                             });
                           }}
-                          className="min-w-0 flex-1 bg-transparent text-right text-sm font-black text-slate-800 outline-none disabled:text-slate-400"
+                          className="min-w-0 flex-1 rounded-full bg-white px-3 text-right text-[13px] font-black text-[#6653e9] outline-none disabled:text-slate-400"
                         />
                         <ToggleSwitch
                           checked={reminder.enabled}
@@ -907,7 +951,7 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                     <button
                       type="button"
                       onClick={addMealReminderTime}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/70 py-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-50"
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-emerald-200 bg-emerald-50 text-[13px] font-black text-emerald-700 transition hover:bg-emerald-100"
                     >
                       <PlusIcon className="size-4" />
                       식단 알림 시간 추가
@@ -916,17 +960,17 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                 ) : null}
               </div>
 
-              <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                      <DumbbellIcon className="size-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-800">
+              <div className={`${surfaceCardClass} px-4 py-3.5`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="inline-flex min-w-0 items-start gap-2">
+                    <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-[#f1efff] text-[#6653e9]">
+                      <DumbbellIcon className="size-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-[13px] font-black leading-none text-[#22243d]">
                         {workoutNotification?.title ?? "운동 기록 리마인더"}
-                      </p>
-                      <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                      </h3>
+                      <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-400">
                         {workoutNotification?.description ??
                           "루틴 시작 전 원하는 시간에 알려드려요."}
                       </p>
@@ -940,14 +984,14 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                 </div>
 
                 {notificationMap.workout ? (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+                  <div className="mt-4 grid gap-2 border-t border-[#eef0f8] pt-3">
                     {workoutReminderTimes.map((reminder) => (
                       <div
                         key={reminder.id}
-                        className="rounded-2xl bg-slate-50 p-4"
+                        className={`${innerPanelClass} p-3`}
                       >
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <span className="text-sm font-black text-slate-800">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[12px] font-black text-[#22243d]">
                             {reminder.label}
                           </span>
                           <div className="flex items-center gap-2">
@@ -975,10 +1019,10 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <label className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
-                            <span className="text-sm font-bold text-slate-700">
-                              운동 시작 시간
+                        <div className="mt-3 grid gap-2">
+                          <label className="flex h-11 items-center justify-between rounded-[10px] bg-white px-3">
+                            <span className="text-[12px] font-bold text-slate-500">
+                              시작 시간
                             </span>
                             <input
                               type="time"
@@ -989,12 +1033,12 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                                   time: event.target.value,
                                 });
                               }}
-                              className="bg-transparent text-right text-sm font-black text-slate-800 outline-none disabled:text-slate-400"
+                              className="min-w-0 bg-transparent text-right text-[13px] font-black text-[#6653e9] outline-none disabled:text-slate-400"
                             />
                           </label>
 
-                          <label className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
-                            <span className="text-sm font-bold text-slate-700">
+                          <label className="flex h-11 items-center justify-between rounded-[10px] bg-white px-3">
+                            <span className="text-[12px] font-bold text-slate-500">
                               운동 전 알림
                             </span>
                             <select
@@ -1005,7 +1049,7 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                                   leadMinutes: event.target.value,
                                 });
                               }}
-                              className="bg-transparent text-right text-sm font-black text-slate-800 outline-none disabled:text-slate-400"
+                              className="bg-transparent text-right text-[13px] font-black text-[#6653e9] outline-none disabled:text-slate-400"
                             >
                               <option value="10">10분 전</option>
                               <option value="30">30분 전</option>
@@ -1013,9 +1057,9 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                             </select>
                           </label>
 
-                          <div className="rounded-2xl bg-white px-4 py-3">
+                          <div className="rounded-[10px] bg-white px-3 py-3">
                             <div className="mb-3 flex items-center justify-between">
-                              <span className="text-sm font-bold text-slate-700">
+                              <span className="text-[12px] font-bold text-slate-500">
                                 반복 요일
                               </span>
                               <ClockIcon className="size-4 text-slate-300" />
@@ -1034,8 +1078,8 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                                     }
                                     className={`aspect-square rounded-full text-[11px] font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
                                       active
-                                        ? "bg-indigo-600 text-white"
-                                        : "bg-slate-50 text-slate-300"
+                                        ? "bg-[#6653e9] text-white shadow-[0_8px_18px_rgba(102,83,233,0.22)]"
+                                        : "bg-[#f3f4fb] text-slate-300"
                                     }`}
                                   >
                                     {day}
@@ -1051,21 +1095,20 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                     <button
                       type="button"
                       onClick={addWorkoutReminderTime}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/70 py-3 text-sm font-black text-indigo-700 transition hover:bg-indigo-50"
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-[#cfc8ff] bg-[#f1efff] text-[13px] font-black text-[#6653e9] transition hover:bg-[#e9e5ff]"
                     >
                       <PlusIcon className="size-4" />
                       운동 알림 시간 추가
                     </button>
-
                   </div>
                 ) : null}
               </div>
             </section>
 
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 rounded-2xl bg-slate-100 p-4">
-                <InfoIcon className="mt-0.5 size-4 shrink-0 text-slate-400" />
-                <p className="text-[11px] leading-5 text-slate-500">
+            <div className={`${surfaceCardClass} p-3`}>
+              <div className="mb-3 flex items-start gap-2 rounded-[10px] bg-[#faf9ff] px-3 py-2.5">
+                <InfoIcon className="mt-0.5 size-4 shrink-0 text-[#6653e9]" />
+                <p className="text-[11px] font-medium leading-5 text-slate-500">
                   브라우저 권한이 꺼져 있으면 앱 설정과 별개로 알림이 표시되지 않을 수 있어요.
                 </p>
               </div>
@@ -1073,13 +1116,13 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
                 type="button"
                 onClick={handleSave}
                 disabled={isSavingNotificationSchedules}
-                className="w-full rounded-2xl bg-indigo-600 py-4 text-sm font-black text-white shadow-lg shadow-indigo-100 disabled:cursor-wait disabled:bg-slate-300 disabled:shadow-none"
+                className="flex h-12 w-full items-center justify-center rounded-[10px] bg-[linear-gradient(135deg,#8876fb,#6150dc)] text-[13px] font-black text-white shadow-[0_12px_22px_rgba(97,80,220,0.24)] transition hover:-translate-y-0.5 disabled:cursor-wait disabled:translate-y-0 disabled:bg-none disabled:bg-slate-300 disabled:shadow-none"
               >
                 {isSavingNotificationSchedules ? "저장 중..." : "저장하기"}
               </button>
               {savedMessage ? (
                 <p
-                  className={`text-center text-xs font-bold ${
+                  className={`mt-3 text-center text-xs font-bold ${
                     saveMessageTone === "error"
                       ? "text-rose-500"
                       : "text-emerald-500"
@@ -1093,53 +1136,116 @@ export function SettingsScreen({ settings }: SettingsScreenProps) {
         ) : null}
 
         <section className="space-y-2">
-          <SectionTitle>지원 및 정보</SectionTitle>
-          <div className="overflow-hidden rounded-[28px] border border-slate-100 bg-white shadow-sm">
-            {settings.infoItems.map((item, index) => {
-              const Icon =
-                item.icon === "faq"
-                  ? HelpCircleIcon
-                  : item.icon === "shield"
-                    ? ShieldIcon
-                    : InfoIcon;
-
-              const row = (
-                <div className="flex items-center justify-between px-5 py-4 transition hover:bg-slate-50">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
-                      <Icon className="size-5" />
+          <SectionTitle>계정</SectionTitle>
+          <div className={`${surfaceCardClass} overflow-hidden px-4 py-3.5`}>
+            <SectionHeading
+              icon={<LogOutIcon className="size-4" />}
+              description="로그아웃과 서비스 이용 상태를 관리해요."
+            >
+              계정 정보
+            </SectionHeading>
+            <div className="divide-y divide-[#eef0f8]">
+              {settings.accountActions.map((action) => {
+                const Icon = action.tone === "danger" ? TrashIcon : LogOutIcon;
+                const content = (
+                  <div className="flex min-h-[50px] items-center justify-between gap-3 transition hover:bg-[#f8f8ff]">
+                    <div
+                      className={`flex min-w-0 items-center gap-2 ${
+                        action.tone === "danger"
+                          ? "text-rose-500"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      <span
+                        className={`grid size-[27px] shrink-0 place-items-center rounded-full ${
+                          action.tone === "danger"
+                            ? "bg-rose-50"
+                            : "bg-[#f1efff] text-[#6653e9]"
+                        }`}
+                      >
+                        <Icon className="size-4" />
+                      </span>
+                      <span className="truncate text-[13px] font-bold">
+                        {action.label}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-slate-700">
-                      {item.label}
-                    </span>
+                    <ChevronRightIcon className="size-4 shrink-0 text-slate-300" />
                   </div>
-                  {item.value ? (
-                    <span className="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-600">
-                      {item.value}
-                    </span>
-                  ) : (
-                    <ChevronRightIcon className="size-4 text-slate-300" />
-                  )}
-                </div>
-              );
+                );
 
-              return item.href ? (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={index < settings.infoItems.length - 1 ? "block border-b border-slate-50" : "block"}
-                >
-                  {row}
-                </Link>
-              ) : (
-                <div
-                  key={item.label}
-                  className={index < settings.infoItems.length - 1 ? "border-b border-slate-50" : ""}
-                >
-                  {row}
-                </div>
-              );
-            })}
+                if (action.href) {
+                  return (
+                    <Link key={action.label} href={action.href} className="block">
+                      {content}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <button
+                    key={action.label}
+                    type="button"
+                    className="block w-full text-left disabled:cursor-wait disabled:opacity-70"
+                    disabled={isLoggingOut}
+                    onClick={
+                      action.action === "logout" ? handleLogout : undefined
+                    }
+                  >
+                    {content}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <SectionTitle>지원</SectionTitle>
+          <div className={`${surfaceCardClass} overflow-hidden px-4 py-3.5`}>
+            <SectionHeading
+              icon={<HelpCircleIcon className="size-4" />}
+              description="도움말과 정책, 앱 버전 정보를 확인해요."
+            >
+              지원 및 정보
+            </SectionHeading>
+            <div className="divide-y divide-[#eef0f8]">
+              {settings.infoItems.map((item) => {
+                const Icon =
+                  item.icon === "faq"
+                    ? HelpCircleIcon
+                    : item.icon === "shield"
+                      ? ShieldIcon
+                      : InfoIcon;
+
+                const row = (
+                  <div className="flex min-h-[50px] items-center justify-between gap-3 transition hover:bg-[#f8f8ff]">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="grid size-[27px] shrink-0 place-items-center rounded-full bg-[#f1efff] text-[#6653e9]">
+                        <Icon className="size-4" />
+                      </span>
+                      <span className="truncate text-[13px] font-bold text-slate-700">
+                        {item.label}
+                      </span>
+                    </div>
+                    {item.value ? (
+                      <span className="shrink-0 rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black leading-none text-[#6653e9]">
+                        {item.value}
+                      </span>
+                    ) : (
+                      <ChevronRightIcon className="size-4 shrink-0 text-slate-300" />
+                    )}
+                  </div>
+                );
+
+                return item.href ? (
+                  <Link key={item.label} href={item.href} className="block">
+                    {row}
+                  </Link>
+                ) : (
+                  <div key={item.label}>{row}</div>
+                );
+              })}
+            </div>
           </div>
         </section>
 

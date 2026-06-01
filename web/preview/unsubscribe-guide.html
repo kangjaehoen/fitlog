@@ -3,181 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>서비스 탈퇴</title>
+    <title>FitLog - 서비스 탈퇴</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        
         body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* 상단부터 배치 */
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f8f8ff;
         }
-
-        .mobile-container {
-            width: 100%;
-            max-width: 450px;
-            /* 고정된 높이 대신 내용에 맞게 조절되도록 설정 */
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        .surface-card {
+            border: 1px solid #edf0ff;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 10px 28px rgba(37, 45, 100, 0.08);
         }
-
-        /* 체크박스 커스텀 디자인 */
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #3b82f6;
-            cursor: pointer;
+        .inner-panel {
+            border: 1px solid #eef0f8;
+            border-radius: 10px;
+            background: #faf9ff;
+            box-shadow: 0 8px 20px rgba(45, 50, 92, 0.04);
         }
-
         .btn-transition {
-            transition: all 0.2s ease;
+            transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
         }
         .btn-transition:active {
-            transform: scale(0.96);
-        }
-
-        /* 스크롤바 숨기기 */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
-
-    <div class="mobile-container">
-        <!-- 상단 헤더 -->
-        <header class="flex items-center px-4 h-14 border-b bg-white sticky top-0 z-10">
-            <button class="p-2 -ml-2" onclick="history.back()">
-                <i class="fa-solid fa-chevron-left text-lg text-slate-600"></i>
-            </button>
-            <h1 class="flex-1 text-center font-bold text-lg mr-8">서비스 탈퇴</h1>
+    <div class="min-h-screen bg-[#f8f8ff] pb-[164px] text-slate-950">
+        <header class="sticky top-0 z-30 border-b border-white/70 bg-white/90 backdrop-blur-xl">
+            <div class="relative mx-auto flex w-full max-w-[390px] items-center px-4 py-4">
+                <button class="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-700" onclick="history.back()" aria-label="뒤로가기">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="pointer-events-none absolute inset-x-0 text-center text-base font-bold text-slate-900">서비스 탈퇴</h1>
+                <div class="ml-auto h-11 w-11"></div>
+            </div>
         </header>
 
-        <!-- 메인 콘텐츠 영역 -->
-        <main class="px-6 pt-8 pb-10">
-            
-            <!-- 안내 박스 -->
-            <div class="bg-slate-50 rounded-2xl p-5 mb-6 border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-[15px]">
-                    <i class="fa-solid fa-circle-info text-blue-500 text-sm"></i>
-                    탈퇴 시 유의사항
-                </h3>
-                <ul class="space-y-4">
-                    <li class="flex gap-3">
-                        <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-check text-[10px]"></i></span>
-                        <p class="text-[14px] text-slate-600 leading-relaxed">
-                            계정 정보 및 <strong>개인 프로필 데이터</strong>가 모두 삭제되며 복구할 수 없습니다.
-                        </p>
+        <main class="mx-auto flex w-full max-w-[390px] flex-col gap-3 px-4 pb-4 pt-3">
+            <section class="relative overflow-hidden rounded-[14px] px-5 py-[18px] text-white shadow-[0_14px_28px_rgba(96,72,220,0.26)]" style="background-image: radial-gradient(circle at 82% 25%, rgba(255,255,255,0.24), transparent 28%), linear-gradient(135deg,#8374f6 0%,#6651e8 48%,#5941d9 100%);">
+                <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.16)_0%,transparent_42%)]"></div>
+                <div class="pointer-events-none absolute -right-5 top-4 grid h-[104px] w-[104px] rotate-[-14deg] place-items-center rounded-[24px] border border-white/15 bg-white/10 text-white/45 shadow-inner">
+                    <i class="fa-solid fa-shield-halved text-5xl"></i>
+                </div>
+
+                <div class="relative max-w-[250px]">
+                    <p class="text-[11px] font-black leading-none tracking-[0.22em] text-white/75">ACCOUNT</p>
+                    <h2 class="mt-2 text-[22px] font-black leading-tight">탈퇴 전 기록과 계정 상태를 확인해요</h2>
+                    <p class="mt-2 text-[12px] font-semibold leading-5 text-white/80">FitLog에 쌓아둔 운동, 식단, 신체 기록이 어떻게 처리되는지 확인한 뒤 진행해 주세요.</p>
+                </div>
+
+                <div class="relative mt-5 grid grid-cols-3 gap-2">
+                    <div class="rounded-[12px] bg-white/15 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                        <div class="mb-2 flex items-center gap-1.5 text-white/70">
+                            <i class="fa-solid fa-shield-halved text-[12px]"></i>
+                            <p class="text-[10px] font-bold leading-none">계정</p>
+                        </div>
+                        <p class="text-[13px] font-black leading-tight text-white">탈퇴 전환</p>
+                    </div>
+                    <div class="rounded-[12px] bg-white/15 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                        <div class="mb-2 flex items-center gap-1.5 text-white/70">
+                            <i class="fa-regular fa-trash-can text-[12px]"></i>
+                            <p class="text-[10px] font-bold leading-none">이용</p>
+                        </div>
+                        <p class="text-[13px] font-black leading-tight text-rose-100">접근 제한</p>
+                    </div>
+                    <div class="rounded-[12px] bg-white/15 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                        <div class="mb-2 flex items-center gap-1.5 text-white/70">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[12px]"></i>
+                            <p class="text-[10px] font-bold leading-none">기록</p>
+                        </div>
+                        <p class="text-[13px] font-black leading-tight text-white">정책 보관</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="surface-card px-4 py-3.5">
+                <div class="mb-4 flex items-start gap-2">
+                    <span class="grid h-[27px] w-[27px] shrink-0 place-items-center rounded-full bg-[#7563f1] text-white">
+                        <i class="fa-solid fa-circle-info text-xs"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <h2 class="text-[13px] font-black leading-none text-[#22243d]">탈퇴 시 유의사항</h2>
+                        <p class="mt-1.5 text-[11px] font-medium leading-4 text-slate-400">아래 내용을 확인해야 최종 탈퇴를 진행할 수 있어요.</p>
+                    </div>
+                </div>
+
+                <ul class="grid gap-2">
+                    <li class="inner-panel flex items-start gap-3 px-3 py-3">
+                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-[11px] font-black text-[#6653e9]">1</span>
+                        <p class="text-[12px] font-semibold leading-5 text-slate-600">계정은 탈퇴 상태로 전환되며 같은 계정으로 서비스 이용이 제한됩니다.</p>
                     </li>
-                    <li class="flex gap-3">
-                        <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-check text-[10px]"></i></span>
-                        <p class="text-[14px] text-slate-600 leading-relaxed">
-                            현재 보유 중인 <strong>잔여 포인트 및 쿠폰</strong>은 모두 소멸되며 재가입 시에도 복구되지 않습니다.
-                        </p>
+                    <li class="inner-panel flex items-start gap-3 px-3 py-3">
+                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-[11px] font-black text-[#6653e9]">2</span>
+                        <p class="text-[12px] font-semibold leading-5 text-slate-600">운동, 식단, 신체 기록은 즉시 물리 삭제하지 않고 탈퇴 상태 계정에 묶어 보관됩니다.</p>
                     </li>
-                    <li class="flex gap-3">
-                        <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-check text-[10px]"></i></span>
-                        <p class="text-[14px] text-slate-600 leading-relaxed">
-                            작성하신 게시물이나 리뷰는 삭제되지 않을 수 있으니, <strong>탈퇴 전 직접 삭제</strong>해 주시기 바랍니다.
-                        </p>
+                    <li class="inner-panel flex items-start gap-3 px-3 py-3">
+                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-[11px] font-black text-[#6653e9]">3</span>
+                        <p class="text-[12px] font-semibold leading-5 text-slate-600">커뮤니티 게시물과 리뷰는 자동 삭제되지 않을 수 있어 직접 정리해 주세요.</p>
                     </li>
-                    <li class="flex gap-3">
-                        <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-check text-[10px]"></i></span>
-                        <p class="text-[14px] text-slate-600 leading-relaxed">
-                            진행 중인 주문 또는 구독 서비스가 있는 경우 탈퇴가 제한될 수 있습니다.
-                        </p>
+                    <li class="inner-panel flex items-start gap-3 px-3 py-3">
+                        <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-[11px] font-black text-[#6653e9]">4</span>
+                        <p class="text-[12px] font-semibold leading-5 text-slate-600">진행 중인 주문 또는 구독이 있다면 탈퇴가 제한될 수 있습니다.</p>
                     </li>
                 </ul>
-            </div>
+            </section>
 
-            <!-- 동의 체크 섹션 -->
-            <label class="flex items-center gap-3 p-4 bg-white border-2 border-slate-100 rounded-2xl cursor-pointer hover:border-blue-100 transition-colors mb-8">
-                <input type="checkbox" id="agree-check">
-                <span class="text-[14px] font-medium text-slate-700 select-none">
-                    안내 내용을 모두 확인하였으며, 탈퇴에 동의합니다.
+            <section class="surface-card px-4 py-3.5">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                    <h2 class="text-[13px] font-black leading-none text-[#22243d]">진행 순서</h2>
+                    <span class="rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black leading-none text-[#6653e9]">3단계</span>
+                </div>
+                <div class="grid gap-2">
+                    <div class="inner-panel flex items-center gap-3 border-[#d8d3ff] bg-[#f7f5ff] px-3 py-3">
+                        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#6653e9] text-[12px] font-black text-white">1</span>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-black text-[#22243d]">안내 확인</p>
+                            <p class="mt-1 text-[11px] font-medium leading-4 text-slate-400">계정 상태와 기록 처리 방식을 먼저 확인합니다.</p>
+                        </div>
+                    </div>
+                    <div id="step-agree" class="inner-panel flex items-center gap-3 px-3 py-3">
+                        <span id="step-agree-number" class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-[12px] font-black text-slate-400">2</span>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-black text-[#22243d]">동의 체크</p>
+                            <p class="mt-1 text-[11px] font-medium leading-4 text-slate-400">탈퇴 동의 후 최종 확인 버튼이 준비됩니다.</p>
+                        </div>
+                    </div>
+                    <div class="inner-panel flex items-center gap-3 px-3 py-3">
+                        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-[12px] font-black text-slate-400">3</span>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-black text-[#22243d]">최종 확인</p>
+                            <p class="mt-1 text-[11px] font-medium leading-4 text-slate-400">확인 후 계정은 탈퇴 상태로 전환됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <label id="agree-card" class="surface-card flex cursor-pointer items-start gap-3 px-4 py-4 transition">
+                <input type="checkbox" id="agree-check" class="sr-only">
+                <span id="agree-mark" class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-slate-200 bg-white text-transparent transition">
+                    <i class="fa-solid fa-check text-[11px]"></i>
+                </span>
+                <span class="min-w-0">
+                    <span class="block text-[13px] font-black text-[#22243d]">탈퇴 안내 확인</span>
+                    <span class="mt-1 block text-[12px] font-semibold leading-5 text-slate-500">안내 내용을 모두 확인했으며, 탈퇴에 동의합니다.</span>
                 </span>
             </label>
-
-            <!-- 버튼 영역 -->
-            <div class="flex flex-col gap-3">
-                <button class="btn-transition w-full h-14 bg-[#101828] text-white rounded-2xl font-bold text-[16px] shadow-lg shadow-slate-200">
-                    계속 이용하기
-                </button>
-                <button id="withdraw-btn" class="btn-transition w-full h-12 bg-transparent text-slate-400 rounded-2xl font-medium text-[14px] hover:text-red-500 hover:bg-red-50">
-                    탈퇴하기
-                </button>
-            </div>
         </main>
+
+        <div class="fixed inset-x-0 bottom-0 z-40 border-t border-indigo-100/80 bg-white/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-14px_28px_rgba(79,70,229,0.10)] backdrop-blur-xl">
+            <div class="mx-auto w-full max-w-[390px]">
+                <div class="mb-2.5 flex items-start gap-2 rounded-[14px] bg-[#faf9ff] px-3 py-2.5">
+                    <i class="fa-solid fa-circle-info mt-1 shrink-0 text-sm text-[#6653e9]"></i>
+                    <p class="text-[11px] font-medium leading-5 text-slate-500">마음이 바뀌었다면 언제든 설정으로 돌아갈 수 있어요. 탈퇴는 최종 확인 후에만 진행됩니다.</p>
+                </div>
+                <div class="grid grid-cols-[1fr_0.82fr] gap-2">
+                    <button id="continue-btn" class="btn-transition flex h-[52px] items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#8876fb,#6150dc)] text-[15px] font-black text-white shadow-[0_12px_22px_rgba(97,80,220,0.24)]">
+                        계속 이용하기
+                    </button>
+                    <button id="withdraw-btn" class="btn-transition flex h-[52px] items-center justify-center rounded-[16px] border border-slate-200 bg-white text-[14px] font-black text-slate-400">
+                        탈퇴하기
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 모달 UI -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden z-50 items-center justify-center p-6">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 overflow-hidden">
-            <h4 id="modal-title" class="text-lg font-bold text-slate-900 mb-2">알림</h4>
-            <p id="modal-message" class="text-slate-600 mb-6 text-sm"></p>
-            <div class="flex gap-2">
-                <button id="modal-cancel" class="flex-1 h-12 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hidden">취소</button>
-                <button id="modal-confirm" class="flex-1 h-12 bg-[#101828] text-white rounded-xl font-bold text-sm">확인</button>
+    <div id="modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/55 p-6 backdrop-blur-sm">
+        <div class="w-full max-w-sm rounded-[24px] bg-white p-5 shadow-2xl">
+            <div id="modal-icon" class="mb-4 grid h-11 w-11 place-items-center rounded-full bg-[#f1efff] text-[#6653e9]">
+                <i class="fa-solid fa-circle-info text-lg"></i>
+            </div>
+            <h2 id="modal-title" class="text-lg font-black text-slate-900">알림</h2>
+            <p id="modal-message" class="mt-2 text-sm leading-6 text-slate-600"></p>
+            <div class="mt-6 flex gap-2">
+                <button id="modal-cancel" class="hidden flex-1 rounded-[14px] bg-slate-100 py-3 text-sm font-bold text-slate-600">취소</button>
+                <button id="modal-confirm" class="flex-1 rounded-[14px] bg-[linear-gradient(135deg,#8876fb,#6150dc)] py-3 text-sm font-bold text-white">확인</button>
             </div>
         </div>
     </div>
 
     <script>
-        const agreeCheck = document.getElementById('agree-check');
-        const withdrawBtn = document.getElementById('withdraw-btn');
-        const overlay = document.getElementById('modal-overlay');
-        const modalMessage = document.getElementById('modal-message');
-        const modalConfirm = document.getElementById('modal-confirm');
-        const modalCancel = document.getElementById('modal-cancel');
+        const agreeCheck = document.getElementById("agree-check");
+        const agreeCard = document.getElementById("agree-card");
+        const agreeMark = document.getElementById("agree-mark");
+        const stepAgree = document.getElementById("step-agree");
+        const stepAgreeNumber = document.getElementById("step-agree-number");
+        const withdrawBtn = document.getElementById("withdraw-btn");
+        const continueBtn = document.getElementById("continue-btn");
+        const overlay = document.getElementById("modal-overlay");
+        const modalTitle = document.getElementById("modal-title");
+        const modalMessage = document.getElementById("modal-message");
+        const modalIcon = document.getElementById("modal-icon");
+        const modalConfirm = document.getElementById("modal-confirm");
+        const modalCancel = document.getElementById("modal-cancel");
 
-        function showModal(msg, showCancel = false, onConfirm = null) {
-            modalMessage.textContent = msg;
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            
-            if(showCancel) {
-                modalCancel.classList.remove('hidden');
-            } else {
-                modalCancel.classList.add('hidden');
-            }
+        function updateAgreementState() {
+            const checked = agreeCheck.checked;
+            agreeCard.classList.toggle("border-[#d8d3ff]", checked);
+            agreeCard.classList.toggle("bg-[#fbfaff]", checked);
+            agreeMark.className = checked
+                ? "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-[#6653e9] bg-[#6653e9] text-white transition"
+                : "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-slate-200 bg-white text-transparent transition";
+            stepAgree.classList.toggle("border-[#d8d3ff]", checked);
+            stepAgree.classList.toggle("bg-[#f7f5ff]", checked);
+            stepAgreeNumber.className = checked
+                ? "grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#6653e9] text-[12px] font-black text-white"
+                : "grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-[12px] font-black text-slate-400";
+            withdrawBtn.className = checked
+                ? "btn-transition flex h-[52px] items-center justify-center rounded-[16px] border border-rose-200 bg-rose-50 text-[14px] font-black text-rose-600"
+                : "btn-transition flex h-[52px] items-center justify-center rounded-[16px] border border-slate-200 bg-white text-[14px] font-black text-slate-400";
+        }
+
+        function showModal({ title, message, danger = false, showCancel = false, onConfirm = null }) {
+            modalTitle.textContent = title || "알림";
+            modalMessage.textContent = message;
+            modalIcon.className = danger
+                ? "mb-4 grid h-11 w-11 place-items-center rounded-full bg-rose-50 text-rose-500"
+                : "mb-4 grid h-11 w-11 place-items-center rounded-full bg-[#f1efff] text-[#6653e9]";
+            modalIcon.innerHTML = danger
+                ? '<i class="fa-regular fa-trash-can text-lg"></i>'
+                : '<i class="fa-solid fa-circle-info text-lg"></i>';
+            modalConfirm.textContent = danger ? "탈퇴 진행" : "확인";
+            modalConfirm.className = danger
+                ? "flex-1 rounded-[14px] bg-rose-500 py-3 text-sm font-bold text-white"
+                : "flex-1 rounded-[14px] bg-[linear-gradient(135deg,#8876fb,#6150dc)] py-3 text-sm font-bold text-white";
+            modalCancel.classList.toggle("hidden", !showCancel);
+            overlay.classList.remove("hidden");
+            overlay.classList.add("flex");
 
             modalConfirm.onclick = () => {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                if(onConfirm) onConfirm();
+                overlay.classList.add("hidden");
+                overlay.classList.remove("flex");
+                if (onConfirm) onConfirm();
             };
-
             modalCancel.onclick = () => {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
+                overlay.classList.add("hidden");
+                overlay.classList.remove("flex");
             };
         }
 
-        withdrawBtn.addEventListener('click', () => {
-            if (!agreeCheck.checked) {
-                showModal('탈퇴 동의 체크박스에 체크해 주세요.');
-            } else {
-                showModal('정말로 탈퇴하시겠습니까? 모든 정보가 사라집니다.', true, () => {
-                    showModal('탈퇴 처리가 완료되었습니다.');
-                });
-            }
+        agreeCheck.addEventListener("change", updateAgreementState);
+
+        continueBtn.addEventListener("click", () => {
+            showModal({
+                title: "계속 이용하기",
+                message: "설정 화면으로 돌아가 FitLog 이용을 계속합니다."
+            });
         });
 
-        document.querySelector('.bg-[#101828]').addEventListener('click', () => {
-            showModal('계속 서비스를 이용해 주셔서 감사합니다!');
+        withdrawBtn.addEventListener("click", () => {
+            if (!agreeCheck.checked) {
+                showModal({
+                    title: "동의가 필요해요",
+                    message: "탈퇴 안내를 확인하고 동의 체크박스를 선택해 주세요."
+                });
+                return;
+            }
+
+            showModal({
+                title: "정말 탈퇴하시겠어요?",
+                message: "정말로 탈퇴하시겠어요? 계정이 탈퇴 상태로 전환되고 서비스 이용이 제한됩니다.",
+                danger: true,
+                showCancel: true,
+                onConfirm: () => {
+                    showModal({
+                        title: "탈퇴 완료",
+                        message: "탈퇴 처리가 완료되었습니다."
+                    });
+                }
+            });
         });
     </script>
 </body>
