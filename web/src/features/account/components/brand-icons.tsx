@@ -1,40 +1,35 @@
+import Image, { type ImageProps } from "next/image";
 import type { SVGProps } from "react";
 import type { SocialLoginData } from "../types";
 
 type IconProps = SVGProps<SVGSVGElement>;
+type FitLogMarkProps = Omit<ImageProps, "src" | "alt" | "width" | "height"> & {
+  alt?: string;
+  width?: number;
+  height?: number;
+};
 
 type ProviderType = SocialLoginData["options"][number]["providerType"];
 
-export function FitLogMark(props: IconProps) {
+export function FitLogMark({
+  alt = "",
+  width = 387,
+  height = 377,
+  className,
+  ...props
+}: FitLogMarkProps) {
   return (
-    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" {...props}>
-      <path
-        d="M14 12.5C14 10.6 15.6 9 17.5 9S21 10.6 21 12.5V23h-7V12.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M22 8.5C22 6.6 23.6 5 25.5 5S29 6.6 29 8.5V23h-7V8.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M30 11.5C30 9.6 31.6 8 33.5 8S37 9.6 37 11.5V23h-7V11.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M7 17.5C7 15.6 8.6 14 10.5 14S14 15.6 14 17.5V27H7v-9.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M7 22h30v8.5C37 38 31.5 43 23.6 43H20c-7.2 0-13-5.8-13-13V22Z"
-        fill="currentColor"
-      />
-      <path
-        d="M15.5 28h15"
-        stroke="white"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-      />
-    </svg>
+    <Image
+      src="/icons/custom/fitlog-logo-transparent.png"
+      alt={alt}
+      width={width}
+      height={height}
+      unoptimized
+      className={["-translate-x-[5%] object-contain", className]
+        .filter(Boolean)
+        .join(" ")}
+      {...props}
+    />
   );
 }
 

@@ -64,7 +64,7 @@ export function SplashScreen({
           }`}
         >
           <div className="mb-5 flex size-20 items-center justify-center rounded-[24px] bg-white text-[#5a4df3] shadow-[0_18px_38px_rgba(31,25,103,0.24)]">
-            <FitLogMark className="size-11" />
+            <FitLogMark className="size-14" />
           </div>
           <h1 className="text-[28px] font-black leading-none tracking-normal">
             {data.title}

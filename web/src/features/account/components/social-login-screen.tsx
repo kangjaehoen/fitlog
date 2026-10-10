@@ -41,7 +41,7 @@ export function SocialLoginScreen({ data }: SocialLoginScreenProps) {
       <main className="w-full max-w-[360px] rounded-[32px] border border-slate-100 bg-slate-50/60 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-[20px] bg-white text-[#5a4df3] shadow-[0_18px_38px_rgba(79,70,229,0.14)]">
-            <FitLogMark className="size-9" />
+            <FitLogMark className="size-11" />
           </div>
           <p className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">
             Welcome
